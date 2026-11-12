@@ -1,0 +1,105 @@
+{
+  "item_id": "dailydialog/train_10033/A_to_B",
+  "stages": {
+    "E1": {
+      "candidates": 2,
+      "valid_evidence": 2
+    },
+    "E2": {
+      "candidates": 3,
+      "valid_evidence": 3
+    },
+    "targeted_rescue": {
+      "candidates": 1,
+      "valid_evidence": 1
+    }
+  },
+  "invalid": [],
+  "candidate_count": 5,
+  "decisions": [
+    {
+      "candidate_id": "c1",
+      "claim": "B's name is Laura",
+      "sources": [
+        "E1",
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "confidence": 0.95,
+      "verdict": "keep",
+      "level": "E1",
+      "reason": "A directly addresses B as 'Laura' in turns 5 and 7, establishing B's name explicitly.",
+      "counterexample": "",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c2",
+      "claim": "B is at a venue with loud music",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "presupposition",
+      "confidence": 0.75,
+      "verdict": "keep",
+      "level": "E2",
+      "reason": "A states 'the music is too loud' in turn 15, presupposing they share the same venue environment where B is present. This is a necessary inference from the shared context.",
+      "counterexample": "B could have left the venue before A made this comment, but the conversation context implies shared presence.",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c3",
+      "claim": "B is at a venue with loud music where people meet (likely a club or bar)",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "cross_turn",
+      "confidence": 0.85,
+      "verdict": "reject",
+      "level": "E3",
+      "reason": "The parenthetical '(likely a club or bar)' is speculative world-knowledge inference not directly established by A's turns. The core facts (loud music, meeting people) are already captured by c2 and turn 15 evidence. Adding venue-type speculation goes beyond grounded inference.",
+      "counterexample": "The venue could be a concert, a party, a festival, or any other loud-music gathering—not necessarily a club or bar.",
+      "same_as": "",
+      "action": "reject_unsupported"
+    },
+    {
+      "candidate_id": "c4",
+      "claim": "B likely suggested or agreed to going outside to talk",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "causal",
+      "confidence": 0.6,
+      "verdict": "reject",
+      "level": "E3",
+      "reason": "A says 'Let's go outside and talk'—this is A's proposal, not evidence that B suggested or agreed. A proposal does not establish B's prior action or agreement. No B reply is visible to confirm agreement.",
+      "counterexample": "B could have refused or ignored the suggestion; A's statement alone does not establish B's response.",
+      "same_as": "",
+      "action": "reject_unsupported"
+    },
+    {
+      "candidate_id": "c5",
+      "claim": "This is B's first time at this venue",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "cross_turn",
+      "confidence": 0.85,
+      "verdict": "reject",
+      "level": "E4",
+      "reason": "Turn 11 ('No, this is my first time here') is attributed to speaker A in the visible_turns list, not B. The rules state 'A's I/me/my is A.' This quote establishes a fact about A (Ted), not B. The mechanism 'rescue' is invalid here.",
+      "counterexample": "This is A's own statement about A's experience at the venue, not B's.",
+      "same_as": "",
+      "action": "reject_unsupported"
+    }
+  ],
+  "final_claims": 2,
+  "api_task_ids": [
+    "c0e95c672ed60ed2234ca24491fb7a691289a820c53a94c9de368ca3ad3f1ce2",
+    "8da40da327c06bc346825a11a53c58669d5043d87826f5effac63e7dd6415d11",
+    "d25c1eac3f9a335f1fe098ee0f02aaf04ad62dba4b68c080801602ca9f850b56",
+    "85861c744af10336f226db070775027a90b1ad6dc3b0c44dcf40113b360473cd"
+  ],
+  "design": "dual route, targeted rescue, globally grouped evidence adjudication"
+}

@@ -1,0 +1,492 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "which countries have you been to ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "I thought you had been to Australia too ."
+        },
+        {
+          "turn_id": 5,
+          "text": "I think I'd say Norway . It has many pictures as fjords , waterfalls , and mountains ."
+        },
+        {
+          "turn_id": 7,
+          "text": "well , the north of Norway is almost always cold , but further south it can be fairly warm in summer . It ’ s a wet country , so there ’ s snow almost everywhere in winter ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B has been to multiple countries",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B has been to at least one country",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B has been to at least one country other than Australia",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B asked A to name or recommend a country",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B has traveled to multiple countries",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B is someone who travels",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B has NOT been to Australia",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "A believed B had been to Australia",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B has been to at least one country",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B has been to at least one country besides Australia",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B has been to at least one country other than Australia.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B asked about or expressed interest in Norway's climate/weather",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B has been to some countries",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B had mentioned visiting other countries before Australia was discussed",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B has been to at least one country that is not Australia",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B has been to at least one country other than Australia",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B has not been to Australia",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B may not have been to Australia",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B has been to multiple countries, including at least one country other than Australia",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "has been to / traveled to",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "quantity",
+            "value": "multiple countries",
+            "core": false,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "scope_exclusion",
+            "value": "at least one country other than Australia",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "discourse_context",
+            "value": "mentioned before Australia was discussed",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B has not been to Australia",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "has not been to",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "Australia",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "certainty",
+            "value": "definite (a0006, a0016) / possible (a0017)",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "A believed B had been to Australia",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "subject",
+            "value": "A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "relation",
+            "value": "believed",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "content",
+            "value": "B had been to Australia",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B asked A to name or recommend a country",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "subject",
+            "value": "B",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "action",
+            "value": "asked A to name or recommend",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "object",
+            "value": "a country",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B asked about or expressed interest in Norway's climate/weather",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "subject",
+            "value": "B",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "action",
+            "value": "asked about / expressed interest in",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "topic",
+            "value": "Norway's climate/weather",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 4297,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2857,
+      "text_tokens": 4297
+    },
+    "prompt_tokens": 1256,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1256
+    },
+    "total_tokens": 5553
+  }
+}

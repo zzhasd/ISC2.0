@@ -1,0 +1,141 @@
+{
+  "item_id": "dailydialog/validation_704/A_to_B",
+  "stages": {
+    "E1": {
+      "candidates": 2,
+      "valid_evidence": 2
+    },
+    "E2": {
+      "candidates": 4,
+      "valid_evidence": 3
+    },
+    "targeted_rescue": {
+      "candidates": 3,
+      "valid_evidence": 3
+    }
+  },
+  "invalid": [
+    {
+      "source": "E2",
+      "claim": "B was able to answer questions about the bookshop's address",
+      "reason": "invalid_or_missing_literal_quote"
+    }
+  ],
+  "candidate_count": 7,
+  "decisions": [
+    {
+      "candidate_id": "c1",
+      "claim": "B helped A",
+      "sources": [
+        "E1",
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "confidence": 0.85,
+      "verdict": "keep",
+      "level": "E1",
+      "reason": "A directly says 'Thank you for your help' addressing B, explicitly attributing help to B.",
+      "counterexample": "",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c2",
+      "claim": "B provided information to A (likely the bookshop's address)",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "causal",
+      "confidence": 0.7,
+      "verdict": "duplicate",
+      "level": "E2",
+      "reason": "c2 and c3 refer to the same event (B providing the bookshop's address to A); c3 is the more specific and accurate formulation.",
+      "counterexample": "",
+      "same_as": "c3",
+      "action": "remove_semantic_duplicate"
+    },
+    {
+      "candidate_id": "c3",
+      "claim": "B provided the bookshop's address to A",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "causal",
+      "confidence": 0.7,
+      "verdict": "keep",
+      "level": "E2",
+      "reason": "A thanks B in turn 3 and then pivots with 'By the way' to a new question, presupposing the address request from turn 1 was fulfilled by B.",
+      "counterexample": "B could have said 'I don't know' and A thanked B for the attempt, though this is unlikely given the pivot to a follow-up question.",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c4",
+      "claim": "B was approached as a source of information about whether the hospital is beside the bookshop",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "confidence": 0.65,
+      "verdict": "keep",
+      "level": "E2",
+      "reason": "A asks B 'is the hospital beside the bookshop', presupposing B is a source who could answer this spatial question (likely a local or passerby with relevant knowledge).",
+      "counterexample": "B could be a tourist who also doesn't know, but A's question presupposes B as an information source.",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c5",
+      "claim": "B provided information about whether the hospital is beside the bookshop",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "cross_turn",
+      "confidence": 0.85,
+      "verdict": "keep",
+      "level": "E2",
+      "reason": "A's final 'Thank you for your help' in turn 5 follows the hospital question in turn 3, implying B also answered that question. The gratitude extends to the hospital information.",
+      "counterexample": "B could have said 'I don't know' for the hospital question, and A still thanked B overall for the address help; however, the structure implies B provided further assistance.",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c6",
+      "claim": "B knows or can identify a specific bookshop (the one A asked about)",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "presupposition",
+      "confidence": 0.8,
+      "verdict": "keep",
+      "level": "E2",
+      "reason": "A uses the definite NP 'the bookshop's address' presupposing a specific, identifiable bookshop that B can also identify (otherwise the question to B would be incoherent).",
+      "counterexample": "A might assume B knows the bookshop but B could actually not know it; still, the presupposition in A's question is that B can identify it.",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c7",
+      "claim": "B knows or can identify a specific hospital (the one A asked about)",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "presupposition",
+      "confidence": 0.75,
+      "verdict": "keep",
+      "level": "E2",
+      "reason": "A uses the definite NP 'the hospital' presupposing a specific hospital that B can identify, as A is asking B about its location relative to the bookshop.",
+      "counterexample": "B might not know which hospital A means, but the presupposition in A's question is that B can identify it.",
+      "same_as": "",
+      "action": "retain"
+    }
+  ],
+  "final_claims": 6,
+  "api_task_ids": [
+    "2b22fc565b519063ef34679f4e54d0c40c7e420ee41d944ade1bbb71f8bc8d13",
+    "beb7508e506b6c35a805d752334c5c92d013be2aeb36c272014cb4799488fd09",
+    "a5c10f17e9ef9b739eb66bdc4abbf082f9ced3d265d8f1bff479fdf30021225f",
+    "8ef84cab9cc1b88b0af0284628bc797059fea7cf7ef07b9c845a18f664ad152b"
+  ],
+  "design": "dual route, targeted rescue, globally grouped evidence adjudication"
+}

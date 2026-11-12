@@ -1,0 +1,757 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "I was wondering if I could borrow the company van for a fundraiser this weekend ."
+        },
+        {
+          "turn_id": 3,
+          "text": "It is in the park downtown ."
+        },
+        {
+          "turn_id": 5,
+          "text": "We will need it for Saturday only ."
+        },
+        {
+          "turn_id": 7,
+          "text": "Mary and I will be driving the van ."
+        },
+        {
+          "turn_id": 9,
+          "text": "Yes , we can do that . Can we borrow the chairs from the lunchroom also ?"
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B has access to or authority over lunchroom chairs",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B has authority over chairs in a lunchroom at the workplace",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is a colleague or superior of A within the same organization",
+          "turn_ids": [
+            1,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B responded positively to the van borrowing request or proposed terms A accepted",
+          "turn_ids": [
+            1,
+            3,
+            5,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B has authority to grant or deny permission to use the lunchroom chairs",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B made a request or proposal in turn 8 that A agreed to with 'Yes, we can do that.'",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B has access to or authority over chairs in the lunchroom",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B is associated with a company that has a van and a lunchroom",
+          "turn_ids": [
+            1,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B is in a position to grant or deny borrowing requests",
+          "turn_ids": [
+            1,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B has access to or authority over the company van",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B has authority or access over chairs in the lunchroom, such that A asks B to borrow them",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B is associated with a company that has a lunchroom",
+          "turn_ids": [
+            1,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B has authority over the company van",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B works at or manages the same company as A",
+          "turn_ids": [
+            1,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B works at or is affiliated with the same company as A",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B has authority over or control of the company van",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B has authority to approve borrowing the company van",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B has authority over or access to the chairs in the lunchroom",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B has authority over company resources (specifically the company van)",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B has authority or access to the company van",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B is involved in scheduling or controlling company resources",
+          "turn_ids": [
+            1,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B has control or authority over the company van (i.e., B is in a position to approve borrowing the van)",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B made a proposal or condition that A agreed to",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B has authority over or control of the chairs in the lunchroom",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B agreed to lend the company van to A",
+          "turn_ids": [
+            1,
+            3,
+            5,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B has authority over or access to the company van",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B can authorize borrowing a company van",
+          "turn_ids": [
+            1,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B has authority or access over the company van, such that A asks B to borrow it",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B has access to or controls the lunchroom chairs",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B has authority to grant or deny permission to use the company van",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B has authority or control over the company van, including the power to approve or deny borrowing it.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "has authority/control/access over",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "the company van",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "power_scope",
+            "value": "can approve, deny, or authorize borrowing",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B has authority or control over the chairs in the lunchroom at the workplace, including the power to grant or deny permission to use them.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "has authority/control/access over",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "chairs in the lunchroom",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "location",
+            "value": "at the workplace",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "power_scope",
+            "value": "can grant or deny permission to use",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B is a colleague or superior of A, working at or affiliated with the same company/organization.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "colleague, superior, or co-worker of A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "organization",
+            "value": "the same company/organization as A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B agreed to lend the company van to A, responding positively to the borrowing request.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "agreed to lend / responded positively",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "the company van",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "recipient",
+            "value": "A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B made a proposal or condition (in turn 8) that A agreed to with 'Yes, we can do that.'",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "made a proposal, request, or condition",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "response",
+            "value": "A agreed to it",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "time",
+            "value": "turn 8",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B is associated with a company that has a van and a lunchroom.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "is associated with",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "entity",
+            "value": "a company",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "resource_van",
+            "value": "has a van",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "resource_lunchroom",
+            "value": "has a lunchroom",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s4"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "B is in a position to grant or deny borrowing requests and is involved in scheduling or controlling company resources.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "authority",
+            "value": "in a position to grant or deny borrowing requests",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "involvement",
+            "value": "involved in scheduling or controlling company resources",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s2"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 8138,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5950,
+      "text_tokens": 8138
+    },
+    "prompt_tokens": 1871,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1871
+    },
+    "total_tokens": 10009
+  }
+}

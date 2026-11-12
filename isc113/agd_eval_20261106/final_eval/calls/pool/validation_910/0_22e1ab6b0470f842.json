@@ -1,0 +1,960 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Emergency road service . May I help you ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "All right . What's your membership card , please ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "And your name ?"
+        },
+        {
+          "turn_id": 7,
+          "text": "What's the expiration date on your card ?"
+        },
+        {
+          "turn_id": 9,
+          "text": "Where is your car now ?"
+        },
+        {
+          "turn_id": 11,
+          "text": "And which direction were you going ?"
+        },
+        {
+          "turn_id": 13,
+          "text": "What is the make and model of your car ?"
+        },
+        {
+          "turn_id": 15,
+          "text": "What color is it ?"
+        },
+        {
+          "turn_id": 17,
+          "text": "What's your licence plate number ?"
+        },
+        {
+          "turn_id": 19,
+          "text": "All right , Madam . I'll have a tow truck there within 30 minutes ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "The target has a membership card",
+          "turn_ids": [
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "The target has a car",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is female",
+          "turn_ids": [
+            19
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "The hidden partner's car has a problem requiring roadside assistance",
+          "turn_ids": [
+            1,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B's car needs towing (B needs a tow truck dispatched to her location)",
+          "turn_ids": [
+            19
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B's car is disabled or broken down requiring a tow",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B needs a tow truck",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B's car has a specific make and model that B can identify",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B is female",
+          "turn_ids": [
+            19
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B is addressed as Madam (female)",
+          "turn_ids": [
+            19
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B has a membership card for emergency road service",
+          "turn_ids": [
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B has a car",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B was going in some direction",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B has a membership card with the emergency road service",
+          "turn_ids": [
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B was going in a direction (driving)",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B's car has a specific color",
+          "turn_ids": [
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "The hidden partner needs a tow truck",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B has a membership card",
+          "turn_ids": [
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "The target owns or has access to a car",
+          "turn_ids": [
+            9,
+            13,
+            15,
+            17
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B contacted emergency road service requesting assistance",
+          "turn_ids": [
+            1,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B is a member of the emergency road service",
+          "turn_ids": [
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B's membership card has an expiration date",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "The hidden partner has a car",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B's car needed a tow truck",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "The target was driving in a direction",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "The hidden partner is female",
+          "turn_ids": [
+            19
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B owns or drives a car that needs roadside help.",
+          "turn_ids": [
+            9,
+            13,
+            15,
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B has a membership with the emergency road service",
+          "turn_ids": [
+            3,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "The target's car requires towing",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B has a licence plate number",
+          "turn_ids": [
+            17
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "B called emergency road service seeking assistance",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "The target has a license plate on their vehicle",
+          "turn_ids": [
+            17
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0032",
+          "claim": "B's car requires a tow truck",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0033",
+          "claim": "B is female",
+          "turn_ids": [
+            19
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0034",
+          "claim": "The hidden partner has a membership card with the emergency road service",
+          "turn_ids": [
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0035",
+          "claim": "B requested a tow truck service",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0036",
+          "claim": "The target's car needs a tow truck",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0037",
+          "claim": "B was driving a car",
+          "turn_ids": [
+            9,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0038",
+          "claim": "B's car has a licence plate",
+          "turn_ids": [
+            17
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0039",
+          "claim": "B needed to report the direction of travel",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0040",
+          "claim": "B was traveling/driving the car at the time of the call",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0041",
+          "claim": "B was driving or traveling in some direction prior to the call",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0042",
+          "claim": "B needs a tow truck for the car",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B is female (addressed as Madam)",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "gender",
+            "value": "female",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0033",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B has a membership card with the emergency road service",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "possession",
+            "value": "membership card",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "service",
+            "value": "emergency road service",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0034",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B's membership card has an expiration date",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "attribute",
+            "value": "expiration date",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B has (owns or has access to) a car",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "owns/has access to",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "car",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B contacted emergency road service requesting assistance for a car problem",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "contacted/called",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "service",
+            "value": "emergency road service",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "reason",
+            "value": "car problem requiring roadside assistance",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B's car needs a tow truck dispatched to her location (car is disabled/broken down)",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "need",
+            "value": "tow truck",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "state",
+            "value": "car disabled or broken down",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "action",
+            "value": "tow truck dispatched to B's location",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "request",
+            "value": "B requested tow truck service",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0032",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0035",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0036",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0042",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "B's car has a specific make and model that B can identify",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "attribute",
+            "value": "make and model",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f8",
+        "canonical_claim": "B's car has a specific color",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "attribute",
+            "value": "color",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f9",
+        "canonical_claim": "B's car has a licence plate (number)",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "attribute",
+            "value": "licence plate number",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0038",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f10",
+        "canonical_claim": "B was driving/traveling in a direction at or prior to the time of the call",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "driving/traveling",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "direction",
+            "value": "some direction",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "time",
+            "value": "at or prior to the call",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0037",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0039",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0040",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0041",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 8116,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5704,
+      "text_tokens": 8116
+    },
+    "prompt_tokens": 2375,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 2375
+    },
+    "total_tokens": 10491
+  }
+}

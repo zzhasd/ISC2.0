@@ -1,0 +1,147 @@
+{
+  "item_id": "dailydialog/train_6719/A_to_B",
+  "stages": {
+    "E1_ledger": {
+      "count": 4,
+      "valid_spans": 4
+    },
+    "E2_mechanisms": {
+      "count": 5,
+      "valid_spans": 5
+    },
+    "targeted_completion": {
+      "count": 0,
+      "skipped": true
+    }
+  },
+  "invalid": [],
+  "candidate_count": 8,
+  "decisions": [
+    {
+      "id": "c1",
+      "claim": "B is addressed as Mr. Chen",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "explicit",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "A explicitly addresses B as 'Mr.Chen' in turns 1, 3, and 9. Direct vocative reference to B.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c2",
+      "claim": "B is involved in a currency exchange transaction",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "Cross-turn evidence: A asks 'How much do you want' (turn 3), quotes exchange rates (turn 5), and hands something over (turn 9). B's involvement in a currency exchange is directly supported.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c3",
+      "claim": "B is exchanging Hong Kong dollars into Renminbi",
+      "sources": [
+        "E1",
+        "E2"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "A quotes the HKD→RMB rate and asks how much B wants, presupposing B is transacting in that direction. The direction is not 100% explicit (could be RMB→HKD), making this a strong E2 presupposition rather than pure E1.",
+      "counterexample": "B could be exchanging RMB into HKD; A merely quoted the reverse rate for reference.",
+      "action": "keep"
+    },
+    {
+      "id": "c4",
+      "claim": "A handed something to B as part of the transaction",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "explicit",
+      "verdict": "reject",
+      "level": "E3",
+      "same_as": "",
+      "reason": "This is an attribute of A (the speaker), not B. The task requires recovering attributes of B. 'Here you are' describes A's action toward B, not a property of B.",
+      "counterexample": "",
+      "action": "reject_unsupported"
+    },
+    {
+      "id": "c5",
+      "claim": "B is named Mr. Chen",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c1",
+      "reason": "c1 already captures that B is addressed as Mr. Chen. c5 infers B's actual name from the address form, which is a weaker E2 presupposition of the same fact already covered by c1.",
+      "counterexample": "B could be using a title or alias; 'Mr. Chen' as address does not guarantee it is B's legal name.",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c6",
+      "claim": "B is male",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "A addresses B as 'sir' in turn 7, which presupposes B is male. This is a genuine E2 presupposition from the honorific.",
+      "counterexample": "'Sir' could be a generic polite form in certain service contexts regardless of actual gender.",
+      "action": "keep"
+    },
+    {
+      "id": "c7",
+      "claim": "B is at a currency exchange counter or bank",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "causal",
+      "verdict": "reject",
+      "level": "E3",
+      "same_as": "",
+      "reason": "The location (bank/counter) is inferred from the transaction type but never explicitly stated. This is speculative world-knowledge inference about setting.",
+      "counterexample": "The exchange could occur at a hotel desk, airport booth, or any other venue.",
+      "action": "reject_unsupported"
+    },
+    {
+      "id": "c8",
+      "claim": "B has requested a specific form of currency (e.g., notes or denomination)",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "A asks 'How do you want it?' in turn 7, presupposing B has a preference regarding form/denomination of currency. This is a genuine E2 presupposition from the question's structure.",
+      "counterexample": "B could respond that they don't care about the form, but the question still presupposes a choice exists.",
+      "action": "keep"
+    }
+  ],
+  "review_second_opinion": {
+    "reviewed": 1,
+    "restored": 0
+  },
+  "final_claims": 5,
+  "generic_claims_kept": 1,
+  "api_task_ids": [
+    "0cbb5fb5bd587de59adccc2530661600256f3eb6cde09498a6e61e50a13cb493",
+    "9b6a9f08d834cba7e9110df8242c4cbf3fa6d49fc946ec3b6b9937be23f07909",
+    "483763cd76a9359ed50bde95f21bf91880299d74f61b9f53de58452efeb9b63d",
+    "530e1bb31cb7e6ca9e5936ef885246e53e9f7042fa921b0f9f2dc344d1c8fca1"
+  ],
+  "design": "relation-preserving E1/E2 + independent dispute review"
+}

@@ -1,0 +1,381 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "I want to improve my handwriting , and I've practiced it for several weeks , but nothing happened . You see , my handwriting is still bad ."
+        },
+        {
+          "turn_id": 3,
+          "text": "I know it , but I don't know when I can make it better ."
+        },
+        {
+          "turn_id": 5,
+          "text": "Yeah , you are right . I must stop complaining and stick to it every day ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B made a statement that A agreed with regarding the handwriting situation",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B stated a fact or piece of information that A already knew",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B previously stated something that A already knew",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B gave A advice or made a statement that A agreed with regarding A's handwriting improvement",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B told A something about handwriting that A acknowledges as true",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B advised A to stop complaining and stick to practicing every day",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B suggested A should practice every day",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B advised A about handwriting practice",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B gave advice that A acknowledged as correct in turn 5",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B advised A to practice handwriting every day",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B made a statement or gave advice that A agrees with",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B made a statement in turn 2 that A already knew or acknowledged as true",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B told A to stop complaining",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B advised A to stop complaining and stick to practicing handwriting every day",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B gave advice or made a claim that A acknowledged as correct",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B suggested A should persist with daily practice",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B made a statement that A acknowledged as true",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B advised A to stop complaining and stick to practicing handwriting every day, and A agreed/acknowledged the advice as correct.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "advised / told / suggested",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "advice_content",
+            "value": "stop complaining and stick to practicing handwriting every day",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "topic",
+            "value": "handwriting improvement / practice",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "A_response",
+            "value": "A agreed / acknowledged as correct",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s3",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s3",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s3",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B stated something (in turn 2) that A already knew, which A acknowledged in turn 3.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "stated / told a fact or information",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "A_prior_knowledge",
+            "value": "A already knew / acknowledged as true",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "time",
+            "value": "turn 2 (referenced in turn 3)",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 3880,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2942,
+      "text_tokens": 3880
+    },
+    "prompt_tokens": 1233,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1233
+    },
+    "total_tokens": 5113
+  }
+}

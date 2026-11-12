@@ -1,0 +1,630 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Recently I have been getting headache and my eyes don't seems to see focus properly ."
+        },
+        {
+          "turn_id": 3,
+          "text": "Two years ago . At that time I had no problems.Now I can ’ t even make out something ten meters away ."
+        },
+        {
+          "turn_id": 5,
+          "text": "All right ."
+        },
+        {
+          "turn_id": 7,
+          "text": "Well , this one is worse ."
+        },
+        {
+          "turn_id": 9,
+          "text": "I can only read the first three lines ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B presented multiple tests to A, with at least one preceding the current one",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B asked A about the onset or duration of A's vision problem",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is in a role that involves assessing A's vision",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B is administering a vision test to A",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B is administering or presenting a vision/eye test to A",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B asked A about when A's symptoms began",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B showing A a chart with multiple lines of text",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B is a healthcare or vision professional (e.g., optometrist or ophthalmologist)",
+          "turn_ids": [
+            1,
+            3,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B conducted a vision examination on A",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B presented a vision chart with multiple lines for A to read",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B gave A an instruction or suggestion that A agreed to follow",
+          "turn_ids": [
+            5,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B made a proposal or suggestion that A accepted with 'All right'",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B is an eye care professional (e.g., optometrist or ophthalmologist)",
+          "turn_ids": [
+            1,
+            3,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B presented A with at least two different vision test charts or versions",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B is showing A an eye chart with multiple lines and asking A to read it",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B provides an eye examination.",
+          "turn_ids": [
+            5,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "A considers one chart worse than the other",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B is conducting a vision/eye examination on A",
+          "turn_ids": [
+            1,
+            3,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B presented A with a multi-line reading target (such as an eye chart)",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B asked A a question about when A's vision problems began or when A last had no problems",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B asked A about when the vision problem started or its timeline",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B is conducting or facilitating a vision examination involving an eye chart",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B is an eye care or healthcare professional (e.g., optometrist or ophthalmologist)",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "role",
+            "value": "eye care / healthcare professional (e.g., optometrist or ophthalmologist)",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B is conducting / administering a vision (eye) examination on A",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "conducting / administering / facilitating",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "vision / eye examination (test)",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "recipient",
+            "value": "A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "method",
+            "value": "involving an eye chart",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s4"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B asked A about the onset or timeline of A's vision problem (when it began / when A last had no problems)",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "asked / inquired",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "topic",
+            "value": "onset / duration / timeline of A's vision problem",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "target",
+            "value": "A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B presented A with multiple (at least two) different vision test charts or versions, with at least one preceding the current one",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "presented",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "vision test charts / versions",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "quantity",
+            "value": "multiple / at least two",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "sequence",
+            "value": "at least one preceding the current one",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B showed / presented A with a multi-line reading target (eye chart) for A to read",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "showing / presenting",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "multi-line chart / reading target (eye chart)",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "purpose",
+            "value": "for A to read",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B made a proposal / suggestion / instruction that A accepted (with 'All right')",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "made a proposal / suggestion / instruction",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "response",
+            "value": "A accepted / agreed to follow",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "A considers one (vision test) chart worse than the other",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "subject",
+            "value": "A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "judgment",
+            "value": "one chart is worse than the other",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 5339,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3422,
+      "text_tokens": 5339
+    },
+    "prompt_tokens": 1540,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1540
+    },
+    "total_tokens": 6879
+  }
+}

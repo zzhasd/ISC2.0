@@ -1,0 +1,92 @@
+"""Render an explicitly exploratory report and audit frozen inference artifacts."""
+import hashlib
+import json
+from isc4_open import ROOT,read,save,sha
+from isc6_module import clause_units
+from isc6_review import OUT
+
+
+def main():
+    s=read(OUT/'summary.json');manifest=read(ROOT/'data/isc6/manifest.json')
+    ds={d['id']:d for d in read(ROOT/'data/isc6/dialogues.json')}
+    audit=read(OUT/'execution_audit.json');pred=read(OUT/'predictions.json')
+    plans={phase:read(OUT/phase/'requests.json') for phase in ['initial','dependent']}
+    checks={
+        '32_intact_original_dialogues':list(ds.values())==read(ROOT/'data/isc4/dialogues.json'),
+        'initial_requests_unchanged':sha(plans['initial'])==manifest['initial_requests_sha256'],
+        'protocol_unchanged':hashlib.sha256((ROOT/'ISC6_PROTOCOL.md').read_bytes()).hexdigest()==manifest['protocol_sha256'],
+        'inference_module_unchanged':hashlib.sha256((ROOT/'experiments/isc6_module.py').read_bytes()).hexdigest()==manifest['module_sha256'],
+        'reference_unchanged':hashlib.sha256((ROOT/'data/isc5/full_AB_reference.json').read_bytes()).hexdigest()==manifest['reference_sha256'],
+        '64_requests_unique':len(audit)==64 and len({a['task_id'] for a in audit})==64,
+        'all_http_200':all(a['http_status']==200 for a in audit),
+        'all_returned_requested_model':all(a['returned_model']=='qwen3.8-flash' for a in audit),
+        'all_new_assertions_reviewed':sum(len(p['facts']) for p in pred)==len(read(OUT/'semantic_review.json')),
+    }
+    from isc4_open import visible
+    for phase,ts in plans.items():
+        for t in ts:
+            content=json.loads(t['payload']['messages'][1]['content'])
+            assert content['visible_A']==visible(ds[t['dialogue_id']])
+            assert set(content)==({'visible_A','clause_units'} if phase=='initial' else {'visible_A','candidates'})
+            if phase=='initial':assert content['clause_units']==clause_units(content['visible_A'])
+    checks['all_request_observations_A_only']=True
+    old=read(ROOT/'results/isc6_design/offline_diagnostic.json')['source_sha256']
+    checks['diagnosed_ISC5_sources_unchanged']=all(hashlib.sha256((ROOT/p).read_bytes()).hexdigest()==h for p,h in old.items())
+    assert all(checks.values()),checks
+    save(OUT/'final_checks.json',checks)
+    label={'direct':'直接提取（历史）','selfcheck':'普通自检（历史）','ledger_verify':'语用账本＋验证（历史）','atomic_contrast':'逐句原子覆盖＋对比消歧（本轮）'}
+    lines=['# ISC6：逐句原子覆盖与对比消歧的实际试验',
+      '', '2026-11-01，Asia/Shanghai。**新方案提高了这批开发样本的严格覆盖，但净增益集中于一个病例，范围外输出明显增加，尚不值得替代旧账本作为稳定改进。**',
+      '', '## 已执行', '',
+      f"原 ISC4 的 32 段完整自然对话，Qwen 只看完整 A。实际调用 {s['new_calls']} 次，全部 HTTP 200，记录 {s['new_tokens']:,} tokens；返回模型全部为 qwen3.8-flash。没有新前缀调用、隐形重试或权重训练。密钥未写入实验产物。",
+      '', '第一步逐句提原子候选，第二步比较主体、模态、时态与竞争解释并逐 ID 裁决。固定六个合成对比示例，没有训练样本检索器或校准判别器。实现见 experiments/isc6_module.py；文献与设计见 ISC6_RESEARCH.md。',
+      '', '32 份初始候选均有效；最终 31/32 有效。test_796 对一个 revise 决策输出 support=uncertain，不属于冻结的确定事实支持枚举，因此整份结果记为无效，不静默修复。原始返回仍完整保留。',
+      '', '## 与历史方法比较', '',
+      '四方法共同有效 29 段，对应 93 条完整参考，其中 41 条暂定 A 可支持。历史 Direct、SelfCheck 因 test_277、test_709 缺失，新方法因 test_796 缺失；不能用全 32 段或最初 100 条当这张表的分母。',
+      '', '| 方法 | 原一对一严格恢复 | 统一原子信息覆盖 | A 依据不足/未决 | 范围外断言 | 平均 tokens/段 |',
+      '| --- | ---: | ---: | ---: | ---: | ---: |']
+    for r in s['methods']:
+        lines.append(f"| {label[r['method']]} | {r['legacy_strict']}/41（{r['legacy_strict']/41:.1%}） | {r['atomic_coverage']}/41（{r['atomic_coverage']/41:.1%}） | {r['A_unsupported_or_uncertain']} | {r['out_of_scope']} | {r['mean_tokens']:.0f} |")
+    lines += ['',
+      'A 依据不足/未决与范围外列可能重叠，不可相加当作错误总数。范围外包括明确关于 A 的事实、被问候/被邀请等纯对话行为和没有具体值的泛化。未经支持不等于隐藏真值必假。原始确定断言分别为 59、60、55、85；完整源文明确冲突分别为 4、3、1、2。',
+      '', '在“有 A 支持、源文一致且属于画像范围”的原始行层面，新方法为 '+str(s['methods'][-1]['grounded_in_scope_raw_claims'])+'/85，账本为 '+str(s['methods'][2]['grounded_in_scope_raw_claims'])+'/55。这仍含冗余及较粗部分匹配，不能当作去重属性精确率或信息量。',
+      '', '原子信息覆盖仅对明确表达多个独立事实的复合句拆分：例如 Professor Clark 包含头衔与姓名。语义去重后每个参考只计一次，不把替代解释多次计分。旧报告的计数没有被覆盖；补充列修正的是表示粒度，不是新模型多推理出了信息。',
+      '', '## 结果是否稳定', '',
+      '相对账本，统一原子覆盖增加 4 条；每段配对增量 0.138，按对话聚类 bootstrap 的探索性 95% 区间 [-0.103, 0.483]。相对普通自检也是多 4 条，区间 [-0.069, 0.448]。均包含零。旧一对一口径相对自检仅多 3 条。',
+      '', '去掉医疗对话 test_526 后，相对账本和普通自检的原子覆盖净增益均为 0。因此不能称为普遍提高了复杂单侧推理；本轮主要修复了一个高密度病例的四条明示护理细节。',
+      '', '具体相对账本的增减：', '',
+      '- 增加：test_526 的阿司匹林条件、抗生素间隔、卧床两天、饮水四项；test_792 的粉丝关系；test_697 的英语程度；test_826 的会员背景；test_91 的广播信息。',
+      '- 丢失：test_826 的大量看电影限定、test_987 的大学课程背景、test_697 的美国停留背景、test_369 的巴黎出行计划。',
+      '- test_91 属于冻结政策中有争议的确认式问句，不把保留该标签当独立证明；排除 test_91_broadcast 与 test_39_profession 后，相对账本的差值区间仍跨零。',
+      '', '## 为什么新方案仍受限', '',
+      '1. 覆盖清单只是结构校验。test_987 登记了句子却没有提出大学候选；test_629 仍漏掉再次疏远背景。所有单元已检查不等于语义覆盖完整。',
+      '2. 对比项质量不足。婚礼病例用“B 记得但假装忘记”作为竞争解释，却没有识别真正关键的“A 记错日期”；模型会比较错误的问题。',
+      '3. 对比裁决不稳定。test_697 的美国候选，action 写 uncertain，解释末尾却转为建议保留。程序遵从结构化 action，没有用解释文字事后改分。',
+      '4. 范围控制退化。允许修改和补漏后，输出出现关于 A 的事实、问候/邀请及泛泛服务行为；仅凭语言提示没有保证最终结果属于 B 画像。',
+      '5. 改善具体抽取不等于增加隐藏信息。医疗例的收益来自 A 已直接说出的条件；未披露的 B 具体内容仍不能凭方法恢复。',
+      '', '## 建议保留什么、下一步改变什么', '',
+      '保留逐句原子候选，特别是数值、程度、条件和模态；暂不把本轮对比裁决器作为旧账本的替代。下一版的重点应是独立对比监督的候选判别，而非继续堆叠自检提示。',
+      '', '建议训练/校准样本分别标注：主体是否为 B、是否有具体个人信息、A 支持性、完整源文真值、时间/撤回状态。训练时允许用 A+B 审核真值，但 A 支持性审核者先只见 A；B 中真实但 A 不支持的命题作为关键负例。推理时仍只输入 A。若保持现有云端 Qwen 不训练权重，先以独立示例库检索对比示范实现；若训练判别器，应明确模型、训练数据与推理成本，不能称当前 Flash 已微调。',
+      '', '新方法确认需要新封存样本、统一原子化评估、独立双人审核、候选覆盖/普通自检/对比裁决消融，以及相近 token 预算的对照。此次同一助手参与设计、看完整源文并审核，且使用历史方法结果，所有区间都是开发诊断。',
+      '', '## 文件与复核', '',
+      '- 协议：ISC6_PROTOCOL.md；研究与设计：ISC6_RESEARCH.md。',
+      '- 请求、原始返回、候选、裁决、全部 90 条新确定断言审核：results/isc6/。',
+      '- 统计：summary.json、method_scores.csv、dialogue_scores.json。',
+      '- 原 ISC5 诊断证据与源哈希：results/isc6_design/offline_diagnostic.json。',
+      '- final_checks.json 检查 64 次唯一请求、32 段边界、A-only 观测、模型返回、协议/提示/参考未变和旧产物未变。3 项单元检查通过。',
+      '', '离线复算：', '', '```powershell',
+      'python experiments/isc6_run.py export',
+      'python experiments/isc6_review.py prepare',
+      'python experiments/isc6_adjudicate.py',
+      'python experiments/isc6_review.py analyze',
+      'python experiments/isc6_report.py',
+      'python -m unittest discover -s experiments -p test_isc6.py -v',
+      '```','']
+    (OUT/'实验报告.md').write_text('\n'.join(lines),encoding='utf-8')
+    save(OUT/'final_manifest.json',{'status':'complete exploratory development run',
+        'summary_sha256':sha(s),'checks_sha256':sha(checks),'inference_manifest':manifest,
+        'semantic_review_sha256':sha(read(OUT/'semantic_review.json'))})
+    print({'checks_passed':len(checks),'report':str(OUT/'实验报告.md')})
+
+
+if __name__=='__main__':main()

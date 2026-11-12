@@ -1,0 +1,602 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Excuse me , driver . Does this bus go to the museum ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "How long is the ride ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "Thank you.How much is the fare ?"
+        },
+        {
+          "turn_id": 7,
+          "text": "Would you please let me know when we get to the stop ? I am a stranger here ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B has knowledge of the route and stops along the line",
+          "turn_ids": [
+            1,
+            3,
+            5,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B is a driver",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is expected to monitor stops and alert passengers.",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B is a bus driver.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B is in a position to observe when the bus reaches a stop and could notify A.",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B provided an answer to A's question about the ride duration.",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B is expected to know the fare amount",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B is a bus driver currently operating a bus",
+          "turn_ids": [
+            1,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B answered A's question about ride duration between turns 3 and 5",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B answered at least one of A's prior questions.",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B is a bus driver.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B operates a bus on a fixed route with multiple stops",
+          "turn_ids": [
+            1,
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "The hidden partner operates a bus",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B is a bus driver",
+          "turn_ids": [
+            1,
+            3,
+            5,
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B is driving a bus that A is riding as a passenger.",
+          "turn_ids": [
+            1,
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "The hidden partner is a bus driver.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "The hidden partner is present on the bus while it is in motion.",
+          "turn_ids": [
+            1,
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B provided information to A about the ride.",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B has operational knowledge of the bus route.",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B is currently operating a bus that A is riding on.",
+          "turn_ids": [
+            1,
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B operates a bus that may go to a museum",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B is currently operating/driving a bus.",
+          "turn_ids": [
+            1,
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "The hidden partner is a driver",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B is in a position to know or announce the fare amount to A",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "The hidden partner is operating a bus",
+          "turn_ids": [
+            1,
+            7
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B is a bus driver.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "role",
+            "value": "bus driver",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B is currently operating/driving a bus that A is riding as a passenger.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "state",
+            "value": "currently operating/driving",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "a bus",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "relation",
+            "value": "A is riding as a passenger on the bus",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B operates a bus on a fixed route with multiple stops and has operational knowledge of the route, which may include a museum destination.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "operates on a fixed route with multiple stops",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "knowledge",
+            "value": "has operational knowledge of the route and stops",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "destination",
+            "value": "may go to a museum",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B is expected to monitor stops and is in a position to observe when the bus reaches a stop and notify A.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "duty",
+            "value": "monitor stops and alert passengers",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "capability",
+            "value": "in a position to observe the stop and notify A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B provided an answer/information to A about the ride duration between turns 3 and 5.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "provided an answer/information to A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "topic",
+            "value": "ride duration",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "time",
+            "value": "between turns 3 and 5",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B is expected to know and is in a position to announce the fare amount to A.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "expectation",
+            "value": "expected to know the fare amount",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "capability",
+            "value": "in a position to know or announce the fare to A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 5353,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3528,
+      "text_tokens": 5353
+    },
+    "prompt_tokens": 1587,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1587
+    },
+    "total_tokens": 6940
+  }
+}

@@ -1,0 +1,951 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Well , we've settled the problems of price , quality and quantity . What mode of payment do you wish to employ ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "Could you adopt D / A or D / P ? You see I have to pay a deposit when I open a letter of credit . That will tie up my funds and add to the cost of my imports , especially for such a huge order ."
+        },
+        {
+          "turn_id": 5,
+          "text": "Anyhow , there would be certain bank charges . We've done business for years and you should have some faith in our credit . It would help me greatly , if you could accept D / A or D / P . It makes no difference to you , but it does to me ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B has settled the problems of price, quality, and quantity with A",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B is being asked to accept D/A or D/P payment terms",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is the seller/exporter in a trade transaction with A (who is the importer).",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "Price, quality, and quantity have been settled between A and B.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B is the exporter/seller in a huge order transaction with A",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B has been doing business with A's company for years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B is expected by A to have faith in A's credit",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B currently lacks faith in A's credit",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B and A have settled the problems of price, quality and quantity in their transaction",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "A and B have done business together for years.",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B has done business with A for years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B is the exporter/seller in a trade transaction with A, who is the importer",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "The current order between A and B is huge.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B does not currently have full faith in A's credit",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B is an exporter (A is importing from B)",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B and A have settled price, quality, and quantity terms",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B is an exporter/seller in a trade negotiation with A",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "The hidden partner (B) is the seller/exporter in this transaction",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B is handling a huge order",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B has been doing business with A for years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "The hidden partner (B) handles a huge order",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "The hidden partner (B) is an exporter/seller in this transaction",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B and A have been doing business together for years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B is involved in a huge order with A",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B is involved in a huge order",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B is the exporter/seller in the transaction with A",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "The target (B) is handling a large order",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B has been doing business with A for years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B's received amount is unaffected by the choice between D/A, D/P, and letter of credit payment methods, according to A's argument",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B has a choice in mode of payment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "B had proposed or was using a letter of credit as the mode of payment",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "The order B is selling to A is described as huge",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0032",
+          "claim": "B has been doing business with A for years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0033",
+          "claim": "B is selling a huge order to A",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0034",
+          "claim": "A and B have already agreed on price, quality, and quantity of the transaction",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0035",
+          "claim": "B has settled the problems of price, quality and quantity with A",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0036",
+          "claim": "B is the seller/exporter in a business transaction where A is the importer",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B and A have settled the problems of price, quality, and quantity in their transaction.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "settled / agreed upon",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "items_settled",
+            "value": "price, quality, and quantity",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "parties",
+            "value": "A and B",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0034",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0035",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "A asks B to accept D/A or D/P as the mode of payment.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "asked / requested to accept",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "payment_terms_requested",
+            "value": "D/A or D/P",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "context",
+            "value": "mode of payment",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B is the seller/exporter in the trade transaction with A, who is the importer.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "B_role",
+            "value": "seller / exporter",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "A_role",
+            "value": "importer / buyer",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "context",
+            "value": "trade transaction / negotiation",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0036",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B and A have been doing business together for years.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "doing business together",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "duration",
+            "value": "years",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "parties",
+            "value": "A and B",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0032",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "A expects B to have faith in A's credit.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "expectation",
+            "value": "have faith in A's credit",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "source_of_expectation",
+            "value": "A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "target",
+            "value": "B",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B does not currently have full faith in A's credit.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "state",
+            "value": "lacks / does not have full faith",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "A's credit",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "timing",
+            "value": "currently",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "The order between A and B is huge.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "size",
+            "value": "huge / large",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "order",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "parties",
+            "value": "A and B",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0033",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f8",
+        "canonical_claim": "According to A's argument, B's received amount is unaffected by the choice among D/A, D/P, and letter of credit payment methods.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "claim",
+            "value": "received amount unaffected",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "condition",
+            "value": "choice among D/A, D/P, and letter of credit",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "source",
+            "value": "A's argument",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f9",
+        "canonical_claim": "B has a choice in mode of payment.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "agency",
+            "value": "has a choice",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "domain",
+            "value": "mode of payment",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f10",
+        "canonical_claim": "B had proposed or was using a letter of credit as the mode of payment.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "proposed or was using",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "payment_method",
+            "value": "letter of credit",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "context",
+            "value": "mode of payment",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 9050,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6172,
+      "text_tokens": 9050
+    },
+    "prompt_tokens": 2168,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 2168
+    },
+    "total_tokens": 11218
+  }
+}

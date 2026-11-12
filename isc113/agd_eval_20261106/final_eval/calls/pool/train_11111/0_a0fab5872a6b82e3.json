@@ -1,0 +1,1165 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Could you do me a favor ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "Could you run over to the store ? We need a few things ."
+        },
+        {
+          "turn_id": 5,
+          "text": "Well , could you pick up some sugar ?"
+        },
+        {
+          "turn_id": 7,
+          "text": "A small bag . I guess we also need a few oranges ."
+        },
+        {
+          "turn_id": 9,
+          "text": "Oh , let's see . . . About six ."
+        },
+        {
+          "turn_id": 11,
+          "text": "Yes . We're out of milk ."
+        },
+        {
+          "turn_id": 13,
+          "text": "No . I think a half gallon will be enough ."
+        },
+        {
+          "turn_id": 15,
+          "text": "I think so . Have you got all that ?"
+        },
+        {
+          "turn_id": 17,
+          "text": "Do you have enough money ?"
+        },
+        {
+          "turn_id": 19,
+          "text": "Thanks very much . I appreciate it ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B was asked to run over to the store to pick up items for A.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B asked whether a full gallon of milk is needed",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B asked whether that was all the items needed",
+          "turn_ids": [
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B asked whether they needed milk.",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "The hidden partner is tasked with picking up sugar, oranges, and milk",
+          "turn_ids": [
+            3,
+            5,
+            7,
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B is in the same household/location as A",
+          "turn_ids": [
+            3,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B was asked whether B had enough money for the purchases.",
+          "turn_ids": [
+            17
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B asked about the quantity of milk",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B is in a shared household with A",
+          "turn_ids": [
+            3,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "The hidden partner is someone the observer can ask to do favors",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "The hidden partner is tracking the list of items to purchase",
+          "turn_ids": [
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B asked how much milk was needed.",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B is in a shared household with A.",
+          "turn_ids": [
+            3,
+            7,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "The hidden partner is in a cooperative relationship with the speaker",
+          "turn_ids": [
+            1,
+            3,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B is expected to have money for the store trip",
+          "turn_ids": [
+            17
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B and A share a household or domestic living arrangement",
+          "turn_ids": [
+            3,
+            7,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B was asked if B has enough money to make the purchases",
+          "turn_ids": [
+            17
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B was asked to buy a half gallon of milk",
+          "turn_ids": [
+            11,
+            13
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B is asked to pick up groceries for A",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B agreed to go to the store for A",
+          "turn_ids": [
+            15,
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B asked whether milk was needed.",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "The hidden partner is expected to have some money available for the errand",
+          "turn_ids": [
+            17
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B agreed to go to the store",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B asked how many oranges were needed",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B asked about the quantity or size of sugar",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B agreed to go to the store to buy items for A",
+          "turn_ids": [
+            15,
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B agreed to do the errand for A",
+          "turn_ids": [
+            15,
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B is in a position to run errands to a nearby store",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B is being asked to run over to the store to pick up items for the household.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B agreed to go to the store to pick up items for A",
+          "turn_ids": [
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "The household is currently out of milk.",
+          "turn_ids": [
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "The hidden partner is expected to travel to a store on behalf of the observer",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0032",
+          "claim": "B is being asked to go to the store.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0033",
+          "claim": "B is expected to purchase sugar, oranges, and milk",
+          "turn_ids": [
+            5,
+            7,
+            9,
+            11,
+            13,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0034",
+          "claim": "The hidden partner has access to a store or means to travel to one",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0035",
+          "claim": "B was asked to pick up a small bag of sugar",
+          "turn_ids": [
+            5,
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0036",
+          "claim": "B was keeping track of the shopping list",
+          "turn_ids": [
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0037",
+          "claim": "B asked about the size or quantity of sugar needed",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0038",
+          "claim": "B asked about the quantity of milk needed.",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0039",
+          "claim": "B knows which store is meant",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0040",
+          "claim": "B was asked to buy about six oranges",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0041",
+          "claim": "B is being asked to go to a store to pick up items for A.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0042",
+          "claim": "B is physically present and able to go to a store.",
+          "turn_ids": [
+            3,
+            17
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0043",
+          "claim": "B asked about the quantity of oranges needed",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0044",
+          "claim": "B agrees to buy groceries for A.",
+          "turn_ids": [
+            15,
+            17,
+            19
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B was asked to go to the store to pick up items for A/the household, in a cooperative relationship where A can request favors of B.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "go/run over to the store",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "purpose",
+            "value": "pick up items/groceries",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "beneficiary",
+            "value": "A / the household",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "relationship",
+            "value": "cooperative; someone A can ask to do favors",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0032",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0041",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B was tasked with purchasing a small bag of sugar, about six oranges, and a half gallon of milk.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "item_sugar",
+            "value": "sugar",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "qty_sugar",
+            "value": "a small bag",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "item_oranges",
+            "value": "oranges",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s4",
+            "name": "qty_oranges",
+            "value": "about six",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s5",
+            "name": "item_milk",
+            "value": "milk",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s6",
+            "name": "qty_milk",
+            "value": "a half gallon",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s3",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0033",
+            "slot_ids": [
+              "s1",
+              "s3",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0035",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0040",
+            "slot_ids": [
+              "s3",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s5",
+              "s6"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "The household is currently out of milk.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "item",
+            "value": "milk",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "state",
+            "value": "out / none remaining",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B was asked whether B had enough money for the purchases, and B is expected to have money available for the errand.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "question",
+            "value": "whether B has enough money",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "purpose",
+            "value": "for the purchases / store trip",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "expectation",
+            "value": "B is expected to have money available",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B agreed to go to the store to buy/pick up items for A.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "agreed to go to the store / do the errand",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "purpose",
+            "value": "buy/pick up items/groceries",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "beneficiary",
+            "value": "A",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0044",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B is in a shared household / domestic living arrangement with A.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "shared household / same location",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "cohabitant",
+            "value": "A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "B asked whether milk was needed.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "question",
+            "value": "whether milk was needed",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "item",
+            "value": "milk",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f8",
+        "canonical_claim": "B asked about the quantity of milk needed (whether a full gallon).",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "question",
+            "value": "quantity/amount of milk needed",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "item",
+            "value": "milk",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "specific_option",
+            "value": "whether a full gallon",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0038",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f9",
+        "canonical_claim": "B asked about the quantity of oranges needed.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "question",
+            "value": "how many / quantity of oranges",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "item",
+            "value": "oranges",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0043",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f10",
+        "canonical_claim": "B asked about the size or quantity of sugar needed.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "question",
+            "value": "size or quantity of sugar",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "item",
+            "value": "sugar",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0037",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f11",
+        "canonical_claim": "B asked whether that was all the items needed and was keeping track of the shopping list.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "question",
+            "value": "whether that was all the items needed",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "state",
+            "value": "tracking / keeping track of the shopping list",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0036",
+            "slot_ids": [
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f12",
+        "canonical_claim": "B is physically present, in a position to run errands, has access to a store, and knows which store is meant.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "capability",
+            "value": "in a position to run errands to a nearby store",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "access",
+            "value": "has access to a store or means to travel to one",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "knowledge",
+            "value": "knows which store is meant",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "presence",
+            "value": "physically present and able to go to a store",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0034",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0039",
+            "slot_ids": [
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0042",
+            "slot_ids": [
+              "s4"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 10015,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6605,
+      "text_tokens": 10015
+    },
+    "prompt_tokens": 2603,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 2603
+    },
+    "total_tokens": 12618
+  }
+}

@@ -1,0 +1,1091 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "The Smiths are arriving at our city tomorrow . Can you draw up a schedule for them ? If they want to make any changes , minor changes can then be made ."
+        },
+        {
+          "turn_id": 3,
+          "text": "They would like to visit our factory and have a look at the new type computer products . Besides , they will introduce their technique in computer manufacturing ."
+        },
+        {
+          "turn_id": 5,
+          "text": "They would also like to have a meeting with our designers . And this time , their visit to our company will lay the basement for our cooperation , so you need to pay more attention ."
+        },
+        {
+          "turn_id": 7,
+          "text": "They will stay for two days . Try to work out an efficient schedule ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B holds a role with scheduling or organizational responsibility",
+          "turn_ids": [
+            1,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B's company employs designers who will meet with the Smiths",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is associated with a factory",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "The hidden partner (B) is subordinate to the observer (A)",
+          "turn_ids": [
+            1,
+            5,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "The hidden partner has authority to make minor changes to the schedule",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B is expected to work out an efficient schedule",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "A and B are affiliated with a computer manufacturing company.",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B's company has a factory that produces computer products",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "The hidden partner is responsible for drawing up schedules",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "The hidden partner has a role involving scheduling or administrative planning",
+          "turn_ids": [
+            1,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B is associated with a company that employs designers",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B is arranging a company visit for the Smiths.",
+          "turn_ids": [
+            1,
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "The meeting with designers takes place at B's company",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B has been tasked with drawing up a schedule for the Smiths' two-day visit",
+          "turn_ids": [
+            1,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B is expected to be capable of drawing up a schedule",
+          "turn_ids": [
+            1,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B is tasked with drawing up a schedule for the Smiths' visit",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B's company has designers",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "A instructs B to pay more attention to the Smiths' visit because it will lay the foundation for cooperation",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B is in the same city as A",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "The hidden partner's company has designers",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "The hidden partner is directed to pay more attention to this task",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B is asked to work out an efficient schedule",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B works at a company that has a factory producing computer products",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "The hidden partner is expected to draw up a schedule for incoming visitors",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B is associated with the same company as A",
+          "turn_ids": [
+            1,
+            3,
+            5,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B needs to pay more attention to this particular visit",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B's company manufactures computer products",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B is being directed to pay more attention to the Smiths' visit",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B's company will receive a technique introduction from the Smiths during their visit",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "The hidden partner is tasked with working out an efficient schedule",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "B is tasked with drawing up a schedule for the Smiths' two-day visit to the company",
+          "turn_ids": [
+            1,
+            5,
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "B's company is in the computer manufacturing industry",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0032",
+          "claim": "B is part of a company that has designers",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0033",
+          "claim": "B is asked to draw up a schedule for the Smiths",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0034",
+          "claim": "The hidden partner is in a subordinate or directed position relative to the observer",
+          "turn_ids": [
+            1,
+            5,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0035",
+          "claim": "B works at the same company as A",
+          "turn_ids": [
+            1,
+            3,
+            5,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0036",
+          "claim": "The hidden partner works at the same company as the observer",
+          "turn_ids": [
+            1,
+            3,
+            5,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0037",
+          "claim": "B is part of a company",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0038",
+          "claim": "A instructs B to pay more attention",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0039",
+          "claim": "B may accommodate minor changes to the schedule if the Smiths request them",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0040",
+          "claim": "B is instructed to pay more attention to the schedule because the visit lays groundwork for future cooperation",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0041",
+          "claim": "B is tasked with drawing up a schedule for the Smiths' two-day visit to A's company",
+          "turn_ids": [
+            1,
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0042",
+          "claim": "The Smiths' visit is planned to establish the foundation for cooperation between B's company and the Smiths",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0043",
+          "claim": "The hidden partner works at the same company as the observer",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0044",
+          "claim": "B is associated with a company that has a factory producing new type computer products",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0045",
+          "claim": "The hidden partner is expected to pay more attention to the visit arrangement",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0046",
+          "claim": "B's schedule must cover a two-day visit",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0047",
+          "claim": "B is expected to produce an efficient schedule",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0048",
+          "claim": "The hidden partner's company has a factory",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0049",
+          "claim": "B is located in the same city as A, where the Smiths are arriving tomorrow",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B is tasked with drawing up an efficient schedule for the Smiths' two-day visit to the company.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "task",
+            "value": "drawing up a schedule",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "visitor",
+            "value": "the Smiths",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "duration",
+            "value": "two days",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "quality",
+            "value": "efficient",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s5",
+            "name": "location",
+            "value": "the company",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0041",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0033",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0047",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0046",
+            "slot_ids": [
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B may accommodate minor changes to the schedule if the Smiths request them.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "authority",
+            "value": "make minor changes to the schedule",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "condition",
+            "value": "if the Smiths request them",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0039",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B's company employs designers who will meet with the Smiths at the company.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "entity",
+            "value": "B's company",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "has",
+            "value": "designers",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "event",
+            "value": "meeting with the Smiths",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "location",
+            "value": "at B's company",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s3",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0032",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B's company has a factory that produces new type computer products, placing it in the computer manufacturing industry.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "entity",
+            "value": "B's company",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "has",
+            "value": "a factory",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "produces",
+            "value": "new type computer products",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "industry",
+            "value": "computer manufacturing",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0044",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0048",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B works at the same company as A and is in a subordinate or directed position relative to A.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "works at the same company as A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "hierarchy",
+            "value": "subordinate/directed position relative to A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0034",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0035",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0036",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0037",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0043",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B is located in the same city as A, where the Smiths are arriving tomorrow.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "location",
+            "value": "same city as A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "event",
+            "value": "Smiths arriving tomorrow",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0049",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "A instructs B to pay more attention to the Smiths' visit because it will lay the foundation for future cooperation.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "instruction",
+            "value": "pay more attention",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "target",
+            "value": "the Smiths' visit / schedule arrangement",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "reason",
+            "value": "visit lays foundation for cooperation",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0038",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0040",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0045",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0042",
+            "slot_ids": [
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f8",
+        "canonical_claim": "The Smiths will introduce their technique in computer manufacturing to B's company during the visit.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "actor",
+            "value": "the Smiths",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "action",
+            "value": "introduce their technique in computer manufacturing",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "recipient",
+            "value": "B's company",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 10272,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7437,
+      "text_tokens": 10272
+    },
+    "prompt_tokens": 2758,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 2758
+    },
+    "total_tokens": 13030
+  }
+}

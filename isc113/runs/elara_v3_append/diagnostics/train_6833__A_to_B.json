@@ -1,0 +1,203 @@
+{
+  "item_id": "dailydialog/train_6833/A_to_B",
+  "stages": {
+    "E1_ledger": {
+      "count": 4,
+      "valid_spans": 4
+    },
+    "E2_mechanisms": {
+      "count": 7,
+      "valid_spans": 7
+    },
+    "targeted_completion": {
+      "count": 1,
+      "valid_spans": 1
+    }
+  },
+  "invalid": [],
+  "candidate_count": 12,
+  "decisions": [
+    {
+      "id": "c1",
+      "claim": "B is male (addressed as 'sir')",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "coreference",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "A directly addresses B as 'sir' in turn 11, establishing B's gender as male.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c2",
+      "claim": "B is requesting to cancel a reservation made in Mr. White's name",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "The full conversation flow (greeting, questions, confirmation of cancellation) establishes B requested the cancellation. Turn 11 confirms A will cancel Mr. White's reservation.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c3",
+      "claim": "The reservation being canceled is for November 21st for 4 nights",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "explicit",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "Turn 11 explicitly states 'November 21st for 4 nights' as the reservation details being canceled.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c4",
+      "claim": "B is not Mr. White (the reservation is for another party)",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "Turn 7 asks if reservation is for B or another party; turn 11 confirms it is Mr. White's reservation, implying B is not Mr. White.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c5",
+      "claim": "B is male",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E1",
+      "same_as": "c1",
+      "reason": "Same claim as c1 (B is male from 'sir' address). c1 is the more precise representative with mechanism noted.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c6",
+      "claim": "B has a reservation under the name Mr. White that is being canceled",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E1",
+      "same_as": "c4",
+      "reason": "c6 ('B has a reservation under Mr. White's name') conflicts with c4 (B is NOT Mr. White). The reservation belongs to Mr. White, not B. c4 is the correct representative.",
+      "counterexample": "The reservation is Mr. White's, not B's; B is merely the caller requesting cancellation.",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c7",
+      "claim": "The reservation being canceled was for November 21st for 4 nights",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E1",
+      "same_as": "c3",
+      "reason": "Same claim as c3 (reservation for November 21st, 4 nights). c3 is the more precise representative.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c8",
+      "claim": "B made a request to cancel a reservation",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "duplicate",
+      "level": "E1",
+      "same_as": "c2",
+      "reason": "c8 is a weaker projection of c2. c2 includes the full detail (Mr. White's name) while c8 only says 'a reservation.' c2 is the more complete representative.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c9",
+      "claim": "B's reservation was made in the name of Mr. White",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "reject",
+      "level": "E3",
+      "same_as": "",
+      "reason": "Turn 3 asks 'In whose name was the reservation made?' and turn 11 answers 'Mr. White's.' This does NOT establish the reservation belongs to B. The correct inference (c4) is that B is NOT Mr. White. c9 falsely attributes the reservation to B.",
+      "counterexample": "The reservation is Mr. White's; B is a different party who called to cancel it.",
+      "action": "reject_unsupported"
+    },
+    {
+      "id": "c10",
+      "claim": "B is the party making the reservation (or associated with it), not merely a third party",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "reject",
+      "level": "E3",
+      "same_as": "",
+      "reason": "Turn 7's question 'for yourself or for another party?' does not presuppose B is the party. It offers two options. Turn 11 confirms it is Mr. White's reservation, meaning B is the other party (not the reservation holder).",
+      "counterexample": "B could be canceling on behalf of Mr. White, making B a third party to the reservation.",
+      "action": "reject_unsupported"
+    },
+    {
+      "id": "c11",
+      "claim": "B provided a name and phone number to A",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "reject",
+      "level": "E3",
+      "same_as": "",
+      "reason": "Turn 9 is a question ('May I have your name and phone number?'). A question does not establish that B provided the information. We cannot see B's response.",
+      "counterexample": "B might have declined or the information might not have been given.",
+      "action": "reject_unsupported"
+    },
+    {
+      "id": "c12",
+      "claim": "B is calling about a room reservation (hotel context)",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "Turn 1 'Room Reservations. May I help you?' establishes the hotel context. B is calling about a room reservation as presupposed by the conversation structure.",
+      "counterexample": "",
+      "action": "keep"
+    }
+  ],
+  "review_second_opinion": {
+    "reviewed": 3,
+    "restored": 0
+  },
+  "final_claims": 5,
+  "generic_claims_kept": 0,
+  "api_task_ids": [
+    "f3c34c0d4d5984d8ddcc8a857798b96fd83c882c1b48c8450fdeb8f4748b579c",
+    "1c06773cec6dcc28090819e60ac6e33f20734399e8be22d3d0daa39a93f37204",
+    "191f2192572b67cb2b606307b31c7f2dc3fefec40f16eca64f9ebedbc7ba5609",
+    "6747855a0b6be591b762e78d1a77327226cc6d8aff34fa274115c8c0b45ab8af",
+    "c0dd0aa4cf315b6ad809e51f799c178339a52b25abc04f1c88164b41d8f6db91"
+  ],
+  "design": "relation-preserving E1/E2 + independent dispute review"
+}

@@ -1,0 +1,151 @@
+{
+  "item_id": "dailydialog/validation_790/A_to_B",
+  "stages": {
+    "E1": {
+      "candidates": 5,
+      "valid_evidence": 3
+    },
+    "E2": {
+      "candidates": 5,
+      "valid_evidence": 3
+    },
+    "targeted_rescue": {
+      "candidates": 3,
+      "valid_evidence": 1
+    }
+  },
+  "invalid": [
+    {
+      "source": "E1",
+      "claim": "B is looking for accommodation near a specific location",
+      "reason": "invalid_or_missing_literal_quote"
+    },
+    {
+      "source": "E1",
+      "claim": "B asked about a payment method the hotel does not accept",
+      "reason": "invalid_or_missing_literal_quote"
+    },
+    {
+      "source": "E2",
+      "claim": "B mentioned a specific location near the hotel",
+      "reason": "invalid_or_missing_literal_quote"
+    },
+    {
+      "source": "E2",
+      "claim": "B asked about a service or payment method the hotel does not offer",
+      "reason": "invalid_or_missing_literal_quote"
+    },
+    {
+      "source": "rescue",
+      "claim": "B mentioned a specific location that the hotel is near",
+      "reason": "invalid_or_missing_literal_quote"
+    },
+    {
+      "source": "rescue",
+      "claim": "B asked about cash payment acceptance",
+      "reason": "invalid_or_missing_literal_quote"
+    }
+  ],
+  "candidate_count": 6,
+  "decisions": [
+    {
+      "candidate_id": "c1",
+      "claim": "B is male",
+      "sources": [
+        "E1",
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "confidence": 0.95,
+      "verdict": "keep",
+      "level": "E1",
+      "reason": "A directly addresses B as 'sir' in turn 9, explicitly indicating B's gender.",
+      "counterexample": "",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c2",
+      "claim": "B asked about meeting rooms",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "causal",
+      "confidence": 0.9,
+      "verdict": "duplicate",
+      "level": "E2",
+      "reason": "Both refer to the same event: B's inquiry about meeting rooms, evidenced by A's 'Yes' response in turn 7. c5 is more precise in specifying it was a yes/no question.",
+      "counterexample": "",
+      "same_as": "c5",
+      "action": "remove_semantic_duplicate"
+    },
+    {
+      "candidate_id": "c3",
+      "claim": "B is interested in making a reservation",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "causal",
+      "confidence": 0.7,
+      "verdict": "reject",
+      "level": "E4",
+      "reason": "A's offer 'Would you like to make a reservation?' is a proposal by A, not evidence of B's interest. B's response is unseen; B could decline.",
+      "counterexample": "B could have said 'No, I'm just asking about the hotel's amenities.'",
+      "same_as": "",
+      "action": "reject_unsupported"
+    },
+    {
+      "candidate_id": "c4",
+      "claim": "B asked about single room pricing",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "confidence": 0.85,
+      "verdict": "keep",
+      "level": "E2",
+      "reason": "A proactively provides single room pricing details, strongly presupposing B asked about rates. A would not volunteer pricing without a prompt from B.",
+      "counterexample": "",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c5",
+      "claim": "B asked whether the hotel has meeting rooms",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "confidence": 0.9,
+      "verdict": "keep",
+      "level": "E2",
+      "reason": "A's affirmative 'Yes' response presupposes B asked whether the hotel has meeting rooms. This is a necessary inference from the dialogue structure.",
+      "counterexample": "",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c6",
+      "claim": "B mentioned having many small meetings",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "presupposition",
+      "confidence": 0.7,
+      "verdict": "reject",
+      "level": "E4",
+      "reason": "A's conditional 'if you have many small meeting' is a hypothetical suggestion, not evidence that B actually mentioned having many small meetings. A is offering advice based on a general scenario.",
+      "counterexample": "B could have said 'I need a room for one person' and A volunteered the conditional as general advice.",
+      "same_as": "",
+      "action": "reject_unsupported"
+    }
+  ],
+  "final_claims": 3,
+  "api_task_ids": [
+    "9c5456b7662baea9b2629e3d080cb82d7e9b2633909ef86a16a6af59bd2d2767",
+    "0922f16c70d5f2996538904678c9e5a5658b1bad98ca26daf72980f4b6a7e8f9",
+    "5f568821865ba50452cf5b8b6c44e5ce175885b18a7e5a72c46c85f88b984d82",
+    "7a653c9f15f669fe2eaae66eb783837359ed63c704e9b65448d35e7992df8cda"
+  ],
+  "design": "dual route, targeted rescue, globally grouped evidence adjudication"
+}

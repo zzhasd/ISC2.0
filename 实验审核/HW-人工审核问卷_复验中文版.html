@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HW · 匿名画像事实踩分盲审（复验版）</title>
+<style>
+:root{color-scheme:light;--bg:#f5f7fb;--white:#fff;--ink:#1a2b44;--muted:#62738b;--line:#e0e6ee;--primary:#2d59b3;--soft:#eaf1ff;--ok:#147364;--warning:#965524}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.62}
+header{padding:15px clamp(16px,3vw,40px);border-bottom:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+header h1{font-size:20px;letter-spacing:-.025em;margin:0}h2{font-size:17px;margin:0}h3{font-size:15px;margin:0}p{margin:5px 0 12px}.dim{color:var(--muted);font-size:12px}.caps{letter-spacing:.04em;font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:740}
+button,input,select,textarea{font:inherit}button{border:1px solid #c8d3e1;border-radius:9px;padding:10px 14px;background:white;color:var(--ink);font-weight:650;cursor:pointer}button:hover{filter:brightness(.97)}button.primary{background:var(--primary);color:white;border-color:var(--primary)}button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #6187eb;outline-offset:2px}
+.toolrow{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.toolrow input{border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-width:110px;max-width:170px}
+.shell{max-width:1570px;margin:auto;padding:20px clamp(14px,3vw,40px);display:grid;grid-template-columns:minmax(330px,.95fr) minmax(500px,1.05fr);gap:18px;align-items:start}
+.panel{border:1px solid var(--line);border-radius:14px;background:var(--white);box-shadow:0 4px 20px #1f386308}
+.reference{position:sticky;top:14px;max-height:calc(100dvh - 28px);display:flex;flex-direction:column;overflow:hidden}.reference-head{padding:17px 20px;border-bottom:1px solid var(--line)}.reference-scroll{padding:0 20px 16px;overflow:auto}
+.selfrow{padding:12px 0;border-bottom:1px solid var(--line)}.selfrow:last-child{border-bottom:0}.selfrow .no{font-size:12px;font-weight:740;color:#3459a4}.selfrow .zh{font-size:14px;font-weight:620;margin-top:3px}.selfrow .ja{font-size:12px;color:var(--muted);margin-top:3px}
+.review{padding:20px 24px}.meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.progress{height:7px;background:#edf1f6;border-radius:99px;overflow:hidden;margin:13px 0 20px}.progress>i{display:block;height:100%;background:#4b76ce;width:0;transition:width .15s}.badge{display:inline-block;font-size:12px;color:#345582;background:#edf3fe;border-radius:100px;padding:4px 10px}
+.portrait{white-space:pre-wrap;border:1px solid #dfe7fa;background:#f7f9ff;padding:18px 20px;border-radius:12px;font-size:16px;line-height:1.82;margin:10px 0 20px}
+.sectionhead{border-bottom:1px solid var(--line);padding-bottom:8px;margin:17px 0 8px}.sectionhead strong{font-size:15px}.sectionhead small{color:var(--muted);font-size:12px}
+.factgroup{padding:9px 11px;margin:8px 0;border:1px solid var(--line);border-radius:10px}.factgroup h3{color:#375373;font-size:12px;margin:0 0 6px}.fact{display:flex;gap:9px;align-items:flex-start;font-size:13px;padding:5px 1px;cursor:pointer}.fact input{accent-color:#315db4;width:17px;height:17px;flex:none;margin-top:2px}.fact span{flex:1}.fact em{color:#7c8ba0;font-size:11px;font-style:normal}
+.factgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 9px}.scale{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin:10px 0}.rate{position:relative;display:flex;cursor:pointer}.rate input{position:absolute;opacity:0}.rate span{border:1px solid var(--line);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:61px;width:100%;text-align:center;line-height:1.3;font-size:12px;padding:4px 0}.rate b{font-size:17px}.rate input:checked+span{border-color:#4975cd;background:#eaf2ff;box-shadow:inset 0 0 0 1px #4975cd}.rate input:focus-visible+span{outline:2px solid #6089f1;outline-offset:2px}
+.topicgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:9px 0}.topic{display:flex;align-items:center;justify-content:center;gap:5px;padding:7px 3px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:12px}.topic:has(input:checked){border-color:#4d79ce;background:#ecf3ff}.topic input{accent-color:var(--primary)}
+textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px;min-height:68px;resize:vertical;font-size:13px}select{padding:7px;border:1px solid var(--line);border-radius:9px;max-width:110px;background:#fff}
+.help{font-size:12px;color:var(--muted);line-height:1.6}.callout{border:1px solid var(--line);background:#f9fbfd;padding:11px 14px;border-radius:10px;font-size:13px;margin:10px 0}.actions{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:14px}.error{font-size:12px;color:#aa3939;margin:8px 0;min-height:18px}
+.resultgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.stat{border:1px solid var(--line);border-radius:12px;padding:15px}.stat .value{font-size:32px;font-weight:770;letter-spacing:-.04em}.stat p{margin:5px 0;font-size:12px;color:var(--muted)}
+.tablebox{overflow:auto;border:1px solid var(--line);border-radius:10px;margin:15px 0}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f2f5fa;color:#465872;text-align:left}td,th{padding:10px 9px;border-bottom:1px solid var(--line)}tr:last-child td{border-bottom:0}td.num{text-align:right;font-variant-numeric:tabular-nums}details{margin:15px 0;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:12px}summary{cursor:pointer;font-weight:700}code{font-size:11px;overflow-wrap:anywhere}
+footer{max-width:1570px;margin:auto;padding:6px 40px 30px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:980px){.shell{grid-template-columns:1fr}.reference{position:static;max-height:300px}.factgrid{grid-template-columns:1fr 1fr}}@media(max-width:580px){.review{padding:16px}.factgrid{grid-template-columns:1fr}.scale{gap:4px}.rate span{font-size:11px}.topicgrid{grid-template-columns:repeat(5,1fr)}header h1{font-size:17px}.resultgrid{grid-template-columns:1fr}footer{padding:10px 20px 30px}}
+
+/* v5 UI revision: active prediction and reference on left; gold fact checklist on right */
+:root{--bg:#f3f6fa;--line:#e3e8f0;--ink:#16273f;--primary:#315bb2}
+body{background:linear-gradient(180deg,#f6f8fc 0,#f3f6fa 28rem)}
+header{background:rgba(255,255,255,.96);box-shadow:0 1px 0 #dde4ee;position:relative;z-index:3}
+header h1{font-size:21px;font-weight:750}
+.shell{max-width:1600px;grid-template-columns:minmax(370px,.84fr) minmax(580px,1.16fr);gap:20px;padding-top:22px;align-items:start}
+.panel{border-color:#dbe3ee;border-radius:16px;box-shadow:0 8px 26px #1931530b}
+.reference{max-height:calc(100dvh - 32px);top:16px;}
+.current-head{padding:22px 22px 17px;background:#f7f9fe;border-bottom:1px solid var(--line);flex:none}
+.current-kicker{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:780;color:#274a8b;letter-spacing:.01em}
+.current-kicker .pulse{width:7px;height:7px;background:#4b7ed1;border-radius:50%;flex:none}
+.position-mini{font-variant-numeric:tabular-nums;background:#e6edf9;color:#355781;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:650;margin-left:auto}
+.portrait-code{margin:12px 0 9px;color:#627a9a;font-size:11px;letter-spacing:.06em;font-weight:700}
+.portrait-left{color:#1e3555;font-size:15px;font-weight:580;line-height:1.82;white-space:pre-wrap;max-height:min(27dvh,240px);min-height:52px;overflow:auto;overflow-wrap:anywhere;scrollbar-width:thin}
+.current-tip{color:#6e7f97;font-size:12px;margin:12px 0 0;line-height:1.6}
+.reference-head{padding:16px 22px 11px;background:#fff}
+.reference-head h2{font-size:16px}
+.reference-head p{margin:4px 0}
+.reference-scroll{padding:0 22px 16px;scrollbar-width:thin}
+.selfrow{padding:13px 0}
+.selfrow .no{display:inline-block;border-radius:7px;background:#edf2fb;padding:2px 7px;color:#345fa0;font-size:11px}
+.selfrow .zh{font-size:13px;font-weight:650;line-height:1.62}
+.selfrow .ja{font-size:12px;line-height:1.66}
+.review{padding:24px 28px 25px}
+.review h2{font-size:19px}
+.progress{margin:12px 0 14px}
+.sectionhead{margin:15px 0 7px}
+.sectionhead strong{font-size:16px}
+.scoring-intro{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f2f6fc;border:1px solid #e0e8f5;border-radius:10px;padding:11px 13px;font-size:12px;color:#486381;margin:0 0 15px}
+.scoring-intro .arr{font-size:16px;flex:none}
+.factgroup{padding:13px 15px 12px;margin:10px 0;border:1px solid #e0e6ef;border-radius:12px;background:white;transition:border-color .15s,background-color .15s}
+.factgroup:hover{border-color:#bccce9}
+.group-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.group-id{color:#315ca9;background:#ecf2fe;font-size:12px;font-weight:780;border-radius:7px;padding:4px 8px;white-space:nowrap;line-height:1.6}
+.group-titles{min-width:0}
+.factgroup .group-zh{color:#1f3554;font-size:13px;font-weight:690;line-height:1.6}
+.factgroup .group-ja{font-size:12px;color:#74859e;line-height:1.62;margin:4px 0 2px;overflow-wrap:anywhere}
+.factgrid{gap:6px 9px}
+.fact{margin:0;background:#f9fbfd;border:1px solid #edf1f7;border-radius:9px;padding:9px 10px;min-height:42px;align-items:center;gap:9px}
+.fact:hover{background:#f2f6fd;border-color:#d3dfed}
+.fact:has(input:checked){border-color:#a6c1f4;background:#eaf2ff}
+.fact input{width:18px;height:18px;margin-top:0}
+.fact span{font-size:13px;line-height:1.45}
+.fact em{display:inline-block;font-size:11px;color:#5476aa;margin-left:2px}
+.scale{margin:12px 0}
+.callout{border-radius:11px}
+@media(max-width:1080px){.shell{grid-template-columns:minmax(310px,.82fr) minmax(460px,1.18fr);gap:13px;padding-inline:14px}.review{padding:20px}.current-head{padding:16px}.reference-head{padding-inline:16px}.reference-scroll{padding-inline:16px}}
+@media(max-width:840px){.shell{grid-template-columns:1fr;max-width:750px}.reference{position:static;max-height:unset}.current-head{padding:19px}.portrait-left{max-height:180px}.reference-scroll{max-height:215px}.factgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){.shell{padding:12px 10px;gap:12px}.review{padding:18px 15px}.factgrid{grid-template-columns:1fr}.factgroup{padding:12px}.scoring-intro{font-size:11px}.current-head{padding:17px}.reference-scroll{max-height:180px}.factgroup .group-ja{font-size:11px}}
+
+/* v5 UI layout update: scoring on the left; anonymous prediction only on the right. */
+.shell{grid-template-columns:minmax(560px,1.18fr) minmax(320px,.82fr);gap:20px}
+.reference{position:sticky;top:16px;max-height:calc(100dvh - 32px);display:block;overflow:auto}
+.current-head{padding:24px;border-bottom:0;background:linear-gradient(180deg,#f7faff 0%,#fff 88%)}
+.portrait-left{max-height:calc(100dvh - 220px);min-height:120px;line-height:1.9;font-size:15px;overflow:auto;overflow-wrap:anywhere}
+.current-tip{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.review{min-width:0}
+@media(max-width:1080px){.shell{grid-template-columns:minmax(470px,1.17fr) minmax(290px,.83fr);gap:14px}}
+@media(max-width:840px){.shell{grid-template-columns:1fr;max-width:750px}.reference{order:-1;position:static;max-height:none}.portrait-left{max-height:200px;min-height:75px}.current-head{padding:19px}}
+@media(max-width:580px){.shell{grid-template-columns:1fr;gap:12px}.current-head{padding:17px}.portrait-left{max-height:180px;min-height:75px}}
+
+/* 原预测文本以只读折叠区提供，防止翻译误解；不暴露来源。 */
+.raw-prediction{margin:10px 0 0;padding:7px 10px;border-color:#dce5f2;background:#fbfcff}
+.raw-prediction summary{font-size:11px;color:#496588}
+.raw-prediction-text{white-space:pre-wrap;overflow-wrap:anywhere;color:#4c5d73;line-height:1.65;font-size:12px;max-height:180px;overflow:auto;margin-top:6px}
+/* V5.2：单行紧凑命中程度，五个离散档位。 */
+.factitem{min-width:0;border:1px solid #edf1f7;border-radius:10px;background:#f9fbfd;overflow:hidden;transition:background-color .15s,border-color .15s}
+.factitem .fact{border:0;border-radius:0;background:transparent;min-height:44px;padding:10px 11px}
+.factitem .fact:hover{background:#f1f5fc}
+.factitem:has(.fact input:checked){border-color:#a8c3f2;background:#f1f6ff}
+.factitem:has(.fact input:checked) .fact{background:transparent}
+.fact-strength{display:flex;align-items:center;gap:9px;padding:5px 11px 8px;border-top:1px solid #d9e5f7;min-width:0}
+.fact-strength[hidden]{display:none!important}
+.fact-strength .tag{flex:none;font-size:11px;font-weight:680;color:#435b7c;white-space:nowrap}
+.fact-strength input[type=range]{flex:1;min-width:50px;max-width:none;accent-color:#3667c3;cursor:pointer;height:18px;margin:0}
+.fact-strength-output{flex:none;min-width:16px;text-align:right;font-size:13px;font-weight:780;color:#2758ad;font-variant-numeric:tabular-nums}
+
+/* V5.3: place contradiction controls and navigation below the sticky anonymous prediction. */
+.review-controls{padding:15px 22px 17px;border-top:1px solid var(--line);background:#fff;}
+.right-scoring-title{font-size:14px;font-weight:750;color:#243a59;line-height:1.45}
+.right-scoring-subtitle{font-size:11px;color:var(--muted);font-weight:500;margin-left:4px}
+.review-controls .right-scoring-help{font-size:11px;margin:6px 0 8px}
+.review-controls .compact-penalty{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin:8px 0 10px}
+.review-controls .rate span{min-height:43px;border-radius:8px;font-size:10px;padding:4px 0 2px}
+.review-controls .rate b{font-size:15px}
+.review-controls .topicgrid{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.review-controls .topic{padding:6px 0;font-size:11px}
+.review-controls .callout{margin:8px 0;padding:9px 10px}
+.review-controls textarea{min-height:55px;max-height:110px;padding:8px 10px;font-size:12px;resize:vertical;line-height:1.5}
+.review-controls .error{margin:3px 0;min-height:0}
+.review-controls .error:empty{display:none}
+.review-controls .right-actions{display:flex;gap:9px;justify-content:space-between;padding:10px 0 4px;background:#fff;position:sticky;bottom:0;z-index:2}
+.review-controls .right-actions button{padding:9px 10px;white-space:nowrap;font-size:13px}
+.review-controls .right-actions .primary{flex:1}
+.review-controls .right-progress-note{font-size:11px;color:var(--muted);margin:2px 0 0}
+.reference{scrollbar-width:thin}
+.current-head{padding-bottom:12px}
+.current-tip{margin-top:10px;padding-top:8px;font-size:11px}
+.portrait-left{max-height:min(24dvh,220px)}
+@media(max-width:1080px){.review-controls{padding:13px 15px 15px}}
+@media(max-width:840px){.reference{position:static;max-height:none}.review-controls .right-actions{position:static}.portrait-left{max-height:210px}}
+@media(max-width:390px){.review-controls .compact-penalty{gap:3px}.review-controls .rate span{font-size:9px}.review-controls .right-actions button{font-size:12px}}
+</style></head><body>
+<header><div><h1>新 B（HW）自述对照 · 匿名画像事实核对</h1><div class="dim">匿名逐条核对 · 16 个事实踩分点 · 命中程度 1–5 级 · 提交前隐藏算法成绩</div></div><div class="toolrow"><label class="dim" for="reviewer">审核员编号</label><input id="reviewer" placeholder="如 J001" autocomplete="off"><button id="saveDraft">导出进度</button><button id="loadDraft">导入记录</button><input id="draftFile" type="file" accept="application/json,.json" hidden><button id="restart">重新开始</button></div></header>
+<div class="shell">
+  <main class="panel review" aria-label="事实踩分审核">
+    <div class="meta"><div><h2 id="pageTitle">事实踩分审核</h2><span class="dim" id="position"></span></div>
+    <div class="toolrow"><span class="badge" id="progressCount">0 / 51 已审核</span><select id="jump" aria-label="跳转至条目"></select></div></div>
+    <div class="progress"><i id="progressBar"></i></div>
+    <div id="content"></div>
+  </main>
+  <aside class="panel reference" aria-label="当前匿名预测">
+    <div class="current-head">
+      <div class="current-kicker"><span class="pulse"></span> 当前匿名预测 <span class="position-mini" id="portraitStep">1 / 51</span></div>
+      <div id="portraitCode" class="portrait-code">匿名画像</div>
+      <div id="portraitLeft" class="portrait-left" aria-live="polite">正在显示当前审核的画像内容</div>
+      <details class="raw-prediction" id="originalDetails"><summary>对照画像原文（可选）</summary><div id="portraitOriginal" class="raw-prediction-text"></div></details>
+      <p class="current-tip">对照左侧勾选命中点；没有命中、也没有矛盾时，直接点击“下一条”即可。</p>
+    </div>
+    <div id="reviewControls" class="review-controls" aria-label="矛盾扣分与审核操作"></div>
+  </aside>
+</div>
+<footer>本页面在本地浏览器中运行；审核期间不展示算法归属或结果。仅在全部 51 条确认且点击“正式提交并查看结果”后，才汇总分数。</footer>
+<script>
+'use strict';
+const SELF=[{"id":"P1","ja":"好きな食べ物は寿司とラーメンです","zh":"喜欢吃寿司和拉面。"},{"id":"P2","ja":"好きなゲームは鬼ごっこ系のゲームです","zh":"喜欢玩追逐抓人（鬼ごっこ）类游戏。"},{"id":"P3","ja":"好きな芸能人はマツコ・デラックスです","zh":"喜欢的艺人是 Matsuko Deluxe（マツコ・デラックス）。"},{"id":"P4","ja":"好きなTV番組はブラタモリと世界ふしぎ発見です","zh":"喜欢的电视节目是《ブラタモリ》和《世界ふしぎ発見》。"},{"id":"P5","ja":"好きな歌手は藤井風と髭ダンディズムです","zh":"喜欢的歌手是藤井风和“髭ダンディズム”（照原文写法）。"},{"id":"P6","ja":"好きな動物は猫です","zh":"喜欢的动物是猫。"},{"id":"P7","ja":"やってみたいことはポーカーのオンラインゲームとフルマラソンです","zh":"想尝试在线扑克游戏和全程马拉松。"},{"id":"P8","ja":"好きな飲み物はビールとハーブティーです","zh":"喜欢的饮料是啤酒和花草茶。"},{"id":"P9","ja":"最近楽しかったことは沖縄と北海道旅行です","zh":"最近开心的经历是去冲绳和北海道旅行。"},{"id":"P10","ja":"最近肩こりに悩んでいます","zh":"最近正为肩膀僵硬、肩颈酸痛（肩こり）烦恼。"}];
+const FACTS=[{"id":"P1a","pid":"P1","label":"喜欢吃寿司（作为喜欢的食物）","weight":5},{"id":"P1b","pid":"P1","label":"喜欢吃拉面（作为喜欢的食物）","weight":5},{"id":"P2a","pid":"P2","label":"喜欢鬼ごっこ类追逐／抓人游戏","weight":10},{"id":"P3a","pid":"P3","label":"喜欢艺人 Matsuko Deluxe（マツコ・デラックス）","weight":10},{"id":"P4a","pid":"P4","label":"喜欢电视节目《ブラタモリ》","weight":5},{"id":"P4b","pid":"P4","label":"喜欢电视节目《世界ふしぎ発見》","weight":5},{"id":"P5a","pid":"P5","label":"喜欢歌手藤井风","weight":5},{"id":"P5b","pid":"P5","label":"喜欢歌手“髭ダンディズム”（原文写法）","weight":5},{"id":"P6a","pid":"P6","label":"喜欢猫（动物偏好；不等于养猫）","weight":10},{"id":"P7a","pid":"P7","label":"想尝试在线扑克游戏（意向；不等于已玩）","weight":5},{"id":"P7b","pid":"P7","label":"想挑战全程马拉松（意向；不等于已跑）","weight":5},{"id":"P8a","pid":"P8","label":"喜欢喝啤酒","weight":5},{"id":"P8b","pid":"P8","label":"喜欢喝花草茶／草本茶","weight":5},{"id":"P9a","pid":"P9","label":"最近去冲绳旅行，并认为是开心经历","weight":5},{"id":"P9b","pid":"P9","label":"最近去北海道旅行，并认为是开心经历","weight":5},{"id":"P10a","pid":"P10","label":"最近受到肩颈僵硬、肩酸（肩こり）困扰","weight":10}];
+const ITEMS=[{"id":"7A34E2570E","text":"在对话发生时，B还没有吃午饭，从早上开始就一直忙忙碌碌。（D1，与A2的对话）","original":"Bは会話時点で昼食をまだ取っておらず、朝からバタバタと忙しかった（D1/A2との会話）。"},{"id":"4E3ED7EE8B","text":"B喜欢用市售的柚子盐味酱汁搭配乌冬面，并认为这种味道很好。B会给弟弟做乌冬面，做两人份时可能豪爽地加入两罐海鸡牌金枪鱼罐头（シーチキン）。B还说如果配料放得很足，食物总量反而可能不够。对话中提到的是弟弟，而非丈夫。（D1）","original":"Bはゆず塩味のたれ（シーチキン缶に市販のたれ）をうどんに使うのが好きで、これを最高の味と考えている。弟くんのためにうどんを作っており、シーチキンを2缶（2人分）入れる豪快な使い方をする。具をちゃんと入れると量が足りなくなるという観察も共有している。Bは旦那さんではなく弟くんがいる（D1/A2との会話）。"},{"id":"AC94E88243","text":"B把夏季使用的空调称作“生命维持装置”，经常抱怨电费负担很重。（D1）","original":"Bはクーラーを生命維持装置と呼び、電気代が痛いと常日頃から言っている（D1/A2との会話）。"},{"id":"244C70C7D2","text":"B曾在8月去北海道旅行，走过很长的路程，还到访了小樽。B喜欢看风景，曾看到令其认为是迄今最美的景色；可能是一边自驾一边欣赏夏季绿色景观。B总体喜欢旅行，也讨论过有人专为赏雪而不是雪祭去北海道的情况。（D2）","original":"Bは8月に北海道へ旅行し、長距離を巡った。小樽も訪問した。景色を見るのが好きで、これまで見た中で最高の景色を見た。車を運転しながら景色を楽しんだ（推定：夏の緑の景色の中でのドライブ）。旅行全般が好き。また、雪まつりではなく雪そのものを目当てに北海道に来る人もいるという話題にも触れた（D2/A2との会話）。"},{"id":"8150577A4C","text":"B的网名是“スキヤキキャット”（寿喜烧猫），由喜爱的寿喜烧与猫组成。B非常喜欢猫，但有猫过敏；若将两大最爱扩展为三大最爱，还会加上音乐。B偏好的部分音乐类型A不熟悉。B只看过《新·奥特曼》的主题曲MV、没有看电影正片；曾在电影院看《壮志凌云2：独行侠》。B还拥有MD播放设备，提到约30年前的“coconejimakidori selection”相关内容。（D3、D6、D11）","original":"Bの名前（ハンドルネーム）はスキヤキキャットで、好物のスキヤキと猫を合体させたものである。スキヤキと猫はBの二大好物であり、猫は本気で好きだが猫アレルギーを持っている。三大好物にすると音楽が加わる。音楽が好きで、Aが疎いジャンルを好んでいる。新ウルトラマンのMVだけを見た（映画本編は未視聴）。Top Gun: Maverickを映画館で見た。MDプレイヤー（約30年前のcoconejimakidoriセレクション）を所有している（D3/A2, D6/A1, D11/A3との会話）。"},{"id":"656D73113D","text":"B比较了解电影，曾向A推荐约翰尼·德普出演的《加勒比海盗》，并具体说明推荐哪一部。B看过《人工智能》（A.I.）和《泰坦尼克号》，认为后者很容易引起观众落泪的共鸣。B觉得阅读网上影评有价值，也认同A对其在影院看过的一部电影的好评。（D4）","original":"Bは映画に詳しく、Aにジョニー・デップの映画（パイレーツ・オブ・カリビアン）を勧め、どの作品がおすすめか具体的に答えた。A.I.（人工知能）とタイタニックを見たことがある。タイタニックは泣ける映画として同意を得やすいと述べた。映画やコンテンツのネットの感想を読むことに価値を見出している。Aが映画館で見た映画が面白かったことに同意した（D4/A2との会話）。"},{"id":"600C419B8F","text":"B最近很喜欢做法式吐司，使用IH电磁烹饪设备的自动功能来制作法式吐司或水煮蛋。该设备无需手动调火，可暂时不盯着火候，B称其功能能直观显示熟度。B过去也会把法式吐司做得里面偏生。B买过不少厨房用品，曾介绍有用的信息，让A想到去百元店查看。（D5）","original":"Bは現在フレンチトーストにハマっており、IH調理器で自動的にフレンチトーストやゆで卵を作れる装置を使っている。この装置は火加減調整不要、目を離せる（ガスコンロと違う）、タイマー機能が時間を計るものではなく焼き加減が一目で分かるものだと説明した。B自身もフレンチトーストを生っぽくしてしまう傾向がある。キッチン用品をたくさん購入している。Aに有益な情報を提供し、Aが100均で確認するきっかけを作った（D5/A2との会話）。"},{"id":"8FF33F32B2","text":"B喜欢抹茶冰淇淋，吃过PARM（パルム）抹茶味，曾与A热烈讨论冰淇淋。（D6）","original":"Bは抹茶アイスが好きで、パルムの抹茶味を食べたことがある。アイスに関する話題で盛り上がった（D6/A1との会話）。"},{"id":"9B04ED0D11","text":"B使用双层床，不是地铺被褥派；画像称B睡在上铺，因热空气上升而觉得很热。B介绍过从双层床翻滚出来等独特使用方法，还讲过差几秒就可能发生跌落的险情。对话也涉及睡下铺、上铺放行李不稳等话题。A认为B很有家居布置方面的巧思。（D7）","original":"Bは二段ベッドを使っており、布団派ではない。上段に寝ており、熱い空気が上に上がるため暑さを経験している。二段ベッドの特定の使い方（転がって出る技など）を説明し、Aが知らなかった使い方を示した。数秒差の転落スレスレの経験がある。二段ベッドのせいで動作が増えることを認めた。下段に寝る提案や上が荷物だと不安定になるという話も出た。インテリアの知恵があるとAに認識されている。涼しいけど別の意味で辛いという睡眠環境もある（D7/A1との会話）。"},{"id":"7F43A75979","text":"B曾向A推荐一家全国连锁拉面店，还介绍日清“ラ王”的冬季限定柚子盐味。B解释某些热门拉面店的总店不在东京，东京只是分店，并告诉A如何查询店主（親方）的资料。（D8）","original":"BはAにラーメン店を勧め、その店は全国展開のチェーン店であることを確認した。ラ王にゆず塩味があり期間限定（冬）であることを伝えた。上位のラーメン店の本店は東京ではなく、東京は支店であると説明した。店主（親方）の情報を確認できる方法も教えた（D8/A1との会話）。"},{"id":"AD1ACE410C","text":"画像称B养猫，Slack头像是一只可爱的猫，拥有Slack账户，并被称作[PERSON]。B还向A介绍过“低咖啡因（decaf）”与“无咖啡因”之间的说法。注意：另一段对话却暗示B无法养宠物，可能是情况变化或把他人的信息错归给B，因此养猫一事存在矛盾和不确定性。（D9、D18）","original":"Bは猫を飼っており、Slackのアイコンは可愛い猫ちゃんである。Slackアカウントを所有している。名前は[PERSON]。デカフェとノンカフェインが同じ意味であることをAに教えた（D9/A1との会話）。【注意：D18/A4との会話ではBがペットを飼えないと示唆されており、この猫飼育情報と矛盾する可能性がある。別パートナーとの会話であるため、状況変化かExtracterの誤帰属の可能性がある。】"},{"id":"B5636FA42F","text":"B会打网球，加入了较正规的网球社团；曾在早上约8点使用包场泳池，并向A讲过某次意外精彩的运动场面。A形容B很温柔；该段对话中B与A3是初次交流。（D10）","original":"Bはテニスをプレイし、テニスサークルに所属している（本格的なサークル）。貸し切りプールを使った経験があり、朝一（8時頃）に行った。珍プレーのエピソードをAに話した。AはBをお優しいと評した。A3とは初対面（D10/A3との会話）。"},{"id":"211E50577A","text":"B喜欢动画，曾推荐《间谍过家家》（SPY×FAMILY），并介绍其与《少年Jump》有关的信息。A认为B的讲解简洁易懂。B还告知A有Jump应用；B可能比A年轻，不太熟悉租录像带的习惯。（D11）","original":"Bはアニメが好きで、SPY×FAMILYを勧め、ジャンプ連載であることを伝えた。説明が端的で分かりやすいとAに評価された。ジャンプにアプリがあることをAに教えた。A3とは初対面。BはAより若く、ビデオレンタルに馴染みがない可能性がある（年バレ発言から推定）。Aに何か役立つことを言った（D11/A3との会話）。"},{"id":"F1F5C26CC8","text":"B熟悉漫画，曾推荐《【我推的孩子】》，说明作品以偶像为主角并带有悬疑元素；也推荐《JOJO的奇妙冒险》，解释其篇幅较长、分不同部。B建议先从《【我推的孩子】》看起。另有推测称B可能参与某种可自行设定的游戏或创作活动，但证据不足。（D12）","original":"Bは漫画に詳しく、Aに推しの子を勧めた（アイドルが主人公、サスペンス要素あり、ジャンプ連載）。ジョジョも勧めた（長く、部に分かれていると説明）。まず推しの子から見ると提案した。Aが自分で設定できる何か（ゲームや創作活動）をしていることを示唆し、Bも同様の活動に関与している可能性がある。BはAより漫画に詳しい人物として認識されている（D12/A3との会話）。"},{"id":"C133BDA8A0","text":"B有过敏情况，可能是猫过敏；姓名被标注为[PERSON]。B过去吃过提供意式蔬菜汤（minestrone）等较时髦菜单的学校营养午餐。（D13）","original":"Bはアレルギー持ち（おそらく猫アレルギー）で、名前は[PERSON]。給食にミネストローネやオシャレなメニューが出た経験がある（D13/A3との会話）。"},{"id":"9F49FCB832","text":"B原定的夏季出行计划取消了；B或其家人可能正在疗养。B谈过香菜咖喱、即食绿咖喱和《鬼灭之刃》联名咖喱；画像还称B的孩子喜欢联名咖喱的味道和贴纸，并收藏“ビックリマン”贴纸或巧克力。A曾表示想得到这些收藏品。以上有部分主体归属不确定。（D14）","original":"Bは夏に行く予定が流れた（残念がられた）。B（またはBの家族）は療養中である。パクチーカレー、レトルトのグリーンカレー、鬼滅の刃カレーについて話した。Bの子供は鬼滅の刃カレーの味も好きで、シールも好きらしい。ビックリマンのシールやチョコレートのコレクションを持っており、Aに譲ってほしいと言われた。A3とは初対面（D14/A3との会話）。"},{"id":"0CE44F5B15","text":"B可能参与决定某次聚餐的菜单，选了西班牙海鲜饭（paella）。B喜欢海鲜，也聊过海鲜咖喱；善于用现有食材做家常菜。B推荐过简单的香蕉甜点做法，并谈到黄油价格较高，可能鼓励A继续练习烹饪。（D15）","original":"Bはパエリアをメニューとして選んだ（食事会のメニュー決定者である可能性）。海鮮料理が好きで、海鮮カレーについて話をした（Aが聞いて食べたくなった）。ありもの食材で定番料理を作れる料理の腕前がある。バナナスイーツのレシピを勧め、簡単だとAに思わせた。バターが高いことを話題にした。Aに料理を頑張るよう励ました可能性がある（D15/A4との会話）。"},{"id":"48D8783B32","text":"B最初因《鬼灭之刃》画面精美而观看，随后被剧情吸引。B有看动画的习惯，空闲时可能一次看约两个季度的内容，喜欢从容地看。（D16）","original":"Bは鬼滅の刃に映像の美しさから入り、内容に惹かれた。アニメを見る習慣があり、時間があるときは2クールほどまとめて見る。落ち着いて見たいという好みがある（D16/A4との会話）。"},{"id":"079EB50194","text":"B使用清凉毛巾，并询问过A有关清凉颈环（クールリング）的事，究竟谁先提出此物不明。B担心降温用品弄湿衣服、饮料让行李变重。B喜欢并经常喝茉莉花茶，但对粉末调味茶是第一次听说。B以前喝茶和咖啡，后来主要喝水，也谈过不同水质的用途。（D17）","original":"Bはクールタオルを使っており、クールリングについてAに質問した（Bがクールリングの存在を知っていたか、Aから聞いたかは曖昧）。暑さ対策で服が濡れることと飲み物で荷物がかさ張ることが悩み。ジャスミンティーが好きでよく飲む。フレーバーティーの粉末は初めて聞いた。お茶やコーヒーを飲んでいたが最終的には水に落ち着いた。水の種類によって使い方が違うことを話した（D17/A4との会話）。"},{"id":"279F084205","text":"B似乎处于无法养宠物的状况，并曾向A介绍某种便利的宠物照护服务（可能与Amazon有关）。注意：另一段对话暗示B在养猫，二者存在矛盾，可能是不同时间的状态变化或信息错归属。（D18）","original":"Bはペットを飼えない状況にある（または飼えないことを示唆した）。ペットケアに関する便利なサービス（おそらくAmazon関連）をAに紹介した。【注意：D9/A1との会話ではBが猫を飼っていると示唆されており、この情報と矛盾する。別パートナー・別セッションのため、Extracterの帰属エラーか状況変化の可能性あり。】（D18/A4との会話）"},{"id":"E9F1DADE98","text":"B谈过夏日天空很美；由于可能与疫情有关的原因，当年夏季无法外出。画像还称B参加料理教室，A询问过上课已有多长时间。（D19）","original":"Bは夏の空が素敵だと話した。今年の夏は出かけられない（おそらく感染者数増加のため）。料理教室に通っており、どのくらい通っているか聞かれた（D19/A4との会話）。"},{"id":"E036FD003B","text":"B非常喜欢猫，但有猫过敏，因此处于无法养猫的状况。","original":"Bは猫が大好きだが、猫アレルギーを持っており、猫を飼えない状況にある。"},{"id":"E593AB6D8C","text":"B的网络昵称中包含“寿喜烧”（スキヤキ）和“猫”。","original":"Bのハンドルネームにはスキヤキと猫が含まれている。"},{"id":"A4D6B8C190","text":"B有弟弟，做饭时豪爽地放入两罐海鸡牌金枪鱼罐头（シーチキン）。","original":"Bは弟がおり、シーチキン缶を二つ入れるほど豪快に食べる。"},{"id":"630C50D1A0","text":"B的电费比去年上涨了5000日元。","original":"Bの電気代は去年より5000円上がった。"},{"id":"07BA4DF42A","text":"B在8月到北海道自驾长途旅行，并去过小樽。","original":"Bは8月に北海道で車を運転して長距離を巡り、小樽にも行った。"},{"id":"B03141FE48","text":"B喜欢旅行，尤其喜欢欣赏沿途景色。","original":"Bは旅行が好きで、特に景色を見ることを好む。"},{"id":"6D1CECDB1A","text":"B喜欢音乐，但曾有一段时间不太看电影、只看MV；不过曾在电影院观看《壮志凌云2：独行侠》。","original":"Bは音楽が好きだが、映画はあまり見ず、MVだけを見ていた時期があった。ただしトップガン マーヴェリックは劇場で見た。"},{"id":"15C71E8533","text":"B很了解电影，高度评价约翰尼·德普的演技，并推荐过《加勒比海盗》和《人工智能》（A.I.）；B被《人工智能》的结局深深感动。","original":"Bは映画に詳しく、ジョニー・デップの演技を高く評価しており、パイレーツ・オブ・カリビアンや『A.I.』を推奨した。『A.I.』のラストに大きく感動した。"},{"id":"E3FC5EAAE2","text":"B热衷制作法式吐司，使用IH电磁炉的自动烹饪及计时功能。","original":"Bはフレンチトースト作りにハマっており、IH調理器の自動調理機能やタイマー機能を活用している。"},{"id":"805CCF13B8","text":"B喜欢抹茶冰淇淋，曾推荐PARM（パルム）抹茶口味。","original":"Bは抹茶味のアイスクリームが好きで、パルムの抹茶味を勧めた。"},{"id":"5709D2D681","text":"B使用双层床，对室内家居布置有一定经验或窍门。","original":"Bは二段ベッドを使っており、インテリアの知恵がある。"},{"id":"AA894EDB4B","text":"B喜欢酱油拉面，熟悉全国连锁拉面品牌与商品，例如日清“ラ王”的柚子盐味。","original":"Bは醤油ラーメンが好きで、全国展開のラーメンチェーン店（ラ王のゆず塩味など）に詳しい。"},{"id":"34BD6AC4D1","text":"B喜欢红茶，可能因某种原因关注咖啡因摄入，了解低咖啡因（decaf）和无咖啡因饮品。","original":"Bは紅茶が好きで、カフェインの摂取について何か事情がある（デカフェやノンカフェインに興味がある）。"},{"id":"09B1D7B56D","text":"B长期认真参加网球社团活动，可能已达到较高水平。","original":"Bはテニスをサークルで本格的に続けており、上級者である可能性が高い。"},{"id":"BF25ACA727","text":"B喜欢动画，尤其觉得《间谍过家家》（SPY×FAMILY）很有趣。","original":"Bはアニメが好きで、特に『SPY×FAMILY』を面白く見ている。"},{"id":"C55D3FAE3F","text":"B拥有MD（迷你光碟），可能早在约30年前就持有“コネジャキドリ／コネジマキドリ”精选系列的MD；名称存在转写不确定性。","original":"BはMD（ミニディスク）を所有しており、コネジャキドリ（コネジマキドリ）セレクションのMDを30年ほど前に持っていた可能性がある。"},{"id":"AB379376C3","text":"B很了解漫画，推荐过带有偶像与悬疑元素的《【我推的孩子】》。","original":"Bは漫画に詳しく、推しの子（アイドルが主人公のサスペンス系）を推奨した。"},{"id":"6ABFDB0069","text":"B参加料理教室，厨艺不错，能用现成食材做出日常菜肴。","original":"Bは料理教室に通っており、定番料理をありもので作れるほど料理が得意である。"},{"id":"198B5AAC34","text":"B热衷《鬼灭之刃》，最喜欢炭治郎，也看过声优花江夏树的YouTube视频。","original":"Bは鬼滅の刃にハマっており、推しは炭治郎。声優の花江夏樹のYouTubeも見ていた。"},{"id":"A8B4E7A53E","text":"B经常吃薯片，通常选择薄盐口味，也很容易被期间限定口味吸引。","original":"Bはポテトチップスをよく食べ、うすしお味を基本としつつ期間限定品にも弱い。"},{"id":"432C377245","text":"B知道清凉颈环这类防暑用品，也了解粉末状的调味茶。","original":"Bはクールリングという暑さ対策グッズを知っており、フレーバーティーの粉末も知っている。"},{"id":"91C2372918","text":"B想养宠物，但目前不能养。","original":"Bはペットを飼いたいが飼えない状況にある。"},{"id":"445F8A51DA","text":"B的家乡在多山地区，未来想回家乡生活。","original":"Bは山が多い地域が地元で、将来は地元に戻って暮らしたいと考えている。"},{"id":"001E03F64B","text":"B从学生时代起连续弹钢琴约十年，每年以参加演奏发表会为目标，但发表会因疫情取消。","original":"Bは学生時代から約10年間ピアノを続けており、毎年の発表会を目標にしていたが、コロナで中止になった。"},{"id":"93B3AE4988","text":"B喜欢柚子盐味的面条酱汁（つゆ／たれ），与A的口味相同。","original":"Bはゆず塩味の麺つゆ（たれ）が好きで、Aと好みが一致した。"},{"id":"8D56C239EB","text":"B特别喜欢香菜，吃香菜咖喱或绿咖喱时还会额外加香菜。","original":"Bはパクチーが異常に好きで、パクチーカレーやグリーンカレーに追いパクチーをする。"},{"id":"82252CC22E","text":"B喜欢看摄影师岩合光昭的猫咪节目，例如《世界猫步》。","original":"Bは岩合光昭の猫の番組（世界猫歩きなど）を好んで見ている。"},{"id":"18CD8613A9","text":"B知道制作香蕉甜点的食谱，并向A介绍过简单易做的版本。","original":"Bはバナナスイーツのレシピを知っており、簡単なものとして紹介した。"},{"id":"608349A70E","text":"B知道一家出售提拉米苏刨冰的热门店铺，曾告知A甚至有外县顾客慕名而来。","original":"Bはティラミスのかき氷を提供する店を知っており、県外からも客が来る人気店であることを伝えた。"},{"id":"54D10D1093","text":"B偏好硬水，并曾用硬水做饭。","original":"Bは硬水派で、料理に硬水を使うことを実践していた。"}];
+// A compact source key is intentionally not read until formal submission.
+const SEALED_KEY='eyI3QTM0RTI1NzBFIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSMSJ9LCI0RTNFRDdFRThCIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSMiJ9LCJBQzk0RTg4MjQzIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSMyJ9LCIyNDRDNzBDN0QyIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSNCJ9LCI4MTUwNTc3QTRDIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSNSJ9LCI2NTZENzMxMTNEIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSNiJ9LCI2MDBDNDE5QjhGIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSNyJ9LCI4RkYzM0YzMkIyIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSOCJ9LCI5QjA0RUQwRDExIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSOSJ9LCI3RjQzQTc1OTc5Ijp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSMTAifSwiQUQxQUNFNDEwQyI6eyJzeXN0ZW0iOiJzdW1tYXJ5Iiwicm93IjoiUjExIn0sIkI1NjM2RkE0MkYiOnsic3lzdGVtIjoic3VtbWFyeSIsInJvdyI6IlIxMiJ9LCIyMTFFNTA1NzdBIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSMTMifSwiRjFGNUMyNkNDOCI6eyJzeXN0ZW0iOiJzdW1tYXJ5Iiwicm93IjoiUjE0In0sIkMxMzNCREE4QTAiOnsic3lzdGVtIjoic3VtbWFyeSIsInJvdyI6IlIxNSJ9LCI5RjQ5RkNCODMyIjp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSMTYifSwiMENFNDRGNUIxNSI6eyJzeXN0ZW0iOiJzdW1tYXJ5Iiwicm93IjoiUjE3In0sIjQ4RDg3ODNCMzIiOnsic3lzdGVtIjoic3VtbWFyeSIsInJvdyI6IlIxOCJ9LCIwNzlFQjUwMTk0Ijp7InN5c3RlbSI6InN1bW1hcnkiLCJyb3ciOiJSMTkifSwiMjc5RjA4NDIwNSI6eyJzeXN0ZW0iOiJzdW1tYXJ5Iiwicm93IjoiUjIwIn0sIkU5RjFEQURFOTgiOnsic3lzdGVtIjoic3VtbWFyeSIsInJvdyI6IlIyMSJ9LCJFMDM2RkQwMDNCIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxIn0sIkU1OTNBQjZEOEMiOnsic3lzdGVtIjoiZGlyZWN0Iiwicm93IjoiUjIifSwiQTRENkI4QzE5MCI6eyJzeXN0ZW0iOiJkaXJlY3QiLCJyb3ciOiJSMyJ9LCI2MzBDNTBEMUEwIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlI0In0sIjA3QkE0REY0MkEiOnsic3lzdGVtIjoiZGlyZWN0Iiwicm93IjoiUjUifSwiQjAzMTQxRkU0OCI6eyJzeXN0ZW0iOiJkaXJlY3QiLCJyb3ciOiJSNiJ9LCI2RDFDRUNEQjFBIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlI3In0sIjE1QzcxRTg1MzMiOnsic3lzdGVtIjoiZGlyZWN0Iiwicm93IjoiUjgifSwiRTNGQzVFQUFFMiI6eyJzeXN0ZW0iOiJkaXJlY3QiLCJyb3ciOiJSOSJ9LCI4MDVDQ0YxM0I4Ijp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxMCJ9LCI1NzA5RDJENjgxIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxMSJ9LCJBQTg5NEVEQjRCIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxMiJ9LCIzNEJENkFDNEQxIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxMyJ9LCIwOUIxRDdCNTZEIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxNCJ9LCJCRjI1QUNBNzI3Ijp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxNSJ9LCJDNTVEM0ZBRTNGIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxNiJ9LCJBQjM3OTM3NkMzIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxNyJ9LCI2QUJGREIwMDY5Ijp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxOCJ9LCIxOThCNUFBQzM0Ijp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIxOSJ9LCJBOEI0RTdBNTNFIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyMCJ9LCI0MzJDMzc3MjQ1Ijp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyMSJ9LCI5MUMyMzcyOTE4Ijp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyMiJ9LCI0NDVGOEE1MURBIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyMyJ9LCIwMDFFMDNGNjRCIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyNCJ9LCI5M0IzQUU0OTg4Ijp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyNSJ9LCI4RDU2QzIzOUVCIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyNiJ9LCI4MjI1MkNDMjJFIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyNyJ9LCIxOENEODYxM0E5Ijp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyOCJ9LCI2MDgzNDlBNzBFIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIyOSJ9LCI1NEQxMEQxMDkzIjp7InN5c3RlbSI6ImRpcmVjdCIsInJvdyI6IlIzMCJ9fQ==';
+const STORE='portrait-blind-retest-20261108-HW-v1';
+const SCHEMA='portrait-blind-retest-20261108-HW-v1';
+const byId=Object.fromEntries(ITEMS.map(x=>[x.id,x]));
+const byPoint=Object.fromEntries(FACTS.map(x=>[x.id,x]));
+const bySelf=Object.fromEntries(SELF.map(x=>[x.id,x]));
+const $=x=>document.getElementById(x);
+const esc=s=>String(s??'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
+function rnd(){if(window.crypto?.getRandomValues){const x=new Uint32Array(1);window.crypto.getRandomValues(x);return x[0]/4294967296;}return Math.random();}
+function shuffle(x){x=[...x];for(let i=x.length-1;i>0;i--){let j=Math.floor(rnd()*(i+1));[x[i],x[j]]=[x[j],x[i]];}return x;}
+function fresh(){return {schema:SCHEMA,reviewer:'',index:0,order:shuffle(ITEMS.map(x=>x.id)),answers:{},submitted_at:null,created_at:new Date().toISOString()};}
+function load(){try{const x=JSON.parse(localStorage.getItem(STORE));if(validState(x))return x;}catch(e){}return fresh();}
+function validOrder(x){return (x?.schema===SCHEMA)&&Array.isArray(x.order)&&x.order.length===ITEMS.length&&new Set(x.order).size===ITEMS.length&&x.order.every(id=>Object.hasOwn(byId,id));}
+function validState(x){return validOrder(x)&&x.answers&&typeof x.answers==='object'&&!Array.isArray(x.answers);}
+// 进度文件有两种合法结构：浏览器内部存储使用 answers，导出 JSON 使用 responses。
+function validImport(x){
+ if(!validOrder(x))return false;
+ if(Array.isArray(x.responses)){
+  const ids=x.responses.map(a=>a?.item_id);
+  return ids.length<=ITEMS.length&&new Set(ids).size===ids.length&&ids.every(id=>typeof id==='string'&&Object.hasOwn(byId,id));
+ }
+ return validState(x);
+}
+let state=load();
+function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
+function answer(id){return state.answers[id]??(state.answers[id]={hits:[],hitLevels:{},penalty:0,topics:[],note:'',verified:false});}
+function checkedIds(xs,allowed){return [...new Set((Array.isArray(xs)?xs:[]).filter(id=>allowed.has(id)))];}
+const knownFacts=new Set(FACTS.map(x=>x.id)), knownSelf=new Set(SELF.map(x=>x.id));
+function normalized(a){
+ const hits=checkedIds(a?.hits,knownFacts);
+ // 对早期 V5 记录向后兼容：已勾选却没有等级的事实点默认 5/5。
+ const src=(a?.hitLevels&&typeof a.hitLevels==='object')?a.hitLevels:{};
+ const hitLevels={};
+ for(const id of hits){const v=Number(src[id]);hitLevels[id]=Number.isInteger(v)&&v>=1&&v<=5?v:5;}
+ return {hits,hitLevels,penalty:Number.isInteger(a?.penalty)&&a.penalty>=0&&a.penalty<=5?a.penalty:0,topics:checkedIds(a?.topics,knownSelf),note:String(a?.note||''),verified:a?.verified===true};
+}
+function good(a){const x=normalized(a);return x.verified&&x.penalty!==null&&(x.penalty===0||(x.topics.length>0&&x.note.trim().length>0));}
+function reviewed(){return state.order.filter(id=>good(state.answers[id])).length;}
+function progress(){const n=reviewed();$('progressCount').textContent=`${n} / ${ITEMS.length} 已审核`;$('progressBar').style.width=`${100*n/ITEMS.length}%`;$('jump').innerHTML=state.order.map((id,i)=>`<option value="${i}" ${i===state.index?'selected':''}>${i+1} ${good(state.answers[id])?'✓':''}</option>`).join('');}
+function goto(index){state.index=Math.min(Math.max(index,0),ITEMS.length);save();render();window.scrollTo({top:0,behavior:'instant'});}
+function grouping(a){
+ return SELF.map(s=>{
+  const f=FACTS.filter(x=>x.pid===s.id);
+  return `<div class="factgroup"><div class="group-head"><span class="group-id">${esc(s.id)}</span><div class="group-titles"><div class="group-zh">${esc(s.zh)}</div><div class="group-ja" lang="ja">${esc(s.ja)}</div></div></div><div class="factgrid">${f.map(x=>{
+   const checked=a.hits.includes(x.id),lv=a.hitLevels[x.id]??5;
+   return `<div class="factitem"><label class="fact"><input type="checkbox" data-fact="${esc(x.id)}" ${checked?'checked':''}><span>${esc(x.label)} <em>(${esc(x.id)})</em></span></label><div class="fact-strength" data-strength="${esc(x.id)}" ${checked?'':'hidden'}><span class="tag">命中程度</span><input type="range" min="1" max="5" step="1" value="${lv}" data-level="${esc(x.id)}" aria-label="${esc(x.label)} 命中程度 1 到 5" aria-valuetext="${lv} 分"><output class="fact-strength-output" data-level-output="${esc(x.id)}">${lv}</output></div></div>`;
+  }).join('')}</div></div>`;
+ }).join('');
+}
+function penaltyRadio(a){const labs=['0 · 无矛盾','1','2','3','4','5 · 严重'];return labs.map((label,v)=>`<label class="rate"><input type="radio" name="penalty" value="${v}" ${a.penalty===v?'checked':''}><span><b>${v}</b>${v===0?'无矛盾':v===5?'严重':'扣分'}</span></label>`).join('');}
+function topicPicker(a){return `<div class="callout"><div><strong>对应哪一条 B 自述？</strong></div><p class="help">可多选。如果一条画像同时矛盾于多个自述，所选扣分在这些自述之间均分。</p><div class="topicgrid">${SELF.map(s=>`<label class="topic"><input type="checkbox" data-topic="${s.id}" ${a.topics.includes(s.id)?'checked':''}>${s.id}</label>`).join('')}</div><label class="help" for="note">请说明与自述直接矛盾的内容（必填）</label></div>`;}
+function render(){progress();$('reviewer').value=state.reviewer||'';if(state.submitted_at){renderResult();return;}if(state.index>=ITEMS.length){renderFinish();return;}const id=state.order[state.index],x=byId[id],a=normalized(answer(id));$('pageTitle').textContent='事实踩分审核';$('position').textContent=`第 ${state.index+1} / ${ITEMS.length} 条 · ${a.verified?'已确认':'待确认'}`;$('portraitStep').textContent=`${state.index+1} / ${ITEMS.length}`;$('portraitCode').textContent=`匿名预测条目 · ${id}`;$('portraitLeft').textContent=x.text;$('portraitOriginal').textContent=x.original;$('originalDetails').hidden=false;$('originalDetails').open=false;$('portraitLeft').scrollTop=0;$('content').innerHTML=`<div class="scoring-intro"><span>对照右侧匿名画像，勾选它明确命中的 B 自述事实点；无需勾选任何项也能继续。</span><span class="arr" aria-hidden="true">☑</span></div><div class="sectionhead"><strong>① 命中了哪些自述事实点？</strong><small>可多选，也可以全部不选</small></div><p class="help">仅勾选本条画像提到或有支持的事实；命中程度默认为 5，可按偏差下调。相似主题和缺乏依据的推断不自动算命中。</p>${grouping(a)}`;
+ $('reviewControls').innerHTML=`<div class="right-scoring-title">② 与 B 自述存在明确矛盾吗？ <span class="right-scoring-subtitle">0–5 分</span></div><p class="help right-scoring-help">默认 0 分；未在自述提及不算矛盾。若本条未命中事实点、也不矛盾，可直接点下一条。</p><div class="scale compact-penalty">${penaltyRadio(a)}</div><div id="topicWrap">${a.penalty>0?topicPicker(a):''}</div><label class="help" for="note" id="noteLabel">${a.penalty>0?'矛盾依据（必填）':'备注（可选）'}</label><textarea id="note" rows="2" placeholder="可选：记录与自述的判断依据">${esc(a.note)}</textarea><div class="error" id="error" aria-live="polite"></div><div class="actions right-actions"><button id="previous" ${state.index===0?'disabled':''}>上一条</button><button class="primary" id="confirm" aria-label="确认本条审核并进入下一条">下一条 <span aria-hidden="true">→</span></button></div><p class="right-progress-note">${a.verified?'本条已审核；如修改则需重新确认':'点击“下一条”即计入已审核进度'}</p>`;
+ document.querySelectorAll('[data-fact]').forEach(el=>el.addEventListener('change',()=>{
+  const b=answer(id),fid=el.dataset.fact,s=new Set(b.hits);
+  b.hitLevels??={};
+  if(el.checked){s.add(fid);b.hitLevels[fid]=5;}else{s.delete(fid);delete b.hitLevels[fid];}
+  b.hits=[...s];b.verified=false;
+  const area=document.querySelector(`[data-strength="${fid}"]`);
+  area.hidden=!el.checked;
+  const slider=area.querySelector('[data-level]');slider.value='5';
+  area.querySelector('[data-level-output]').textContent='5';slider.setAttribute('aria-valuetext','5 分');
+  save();progress();
+ }));
+ document.querySelectorAll('[data-level]').forEach(el=>el.addEventListener('input',()=>{
+  const b=answer(id),fid=el.dataset.level,v=Number(el.value);
+  if(!b.hits.includes(fid))return;
+  b.hitLevels??={};b.hitLevels[fid]=v;b.verified=false;
+  document.querySelector(`[data-level-output="${fid}"]`).textContent=String(v);el.setAttribute('aria-valuetext',`${v} 分`);
+  save();progress();
+ }));
+ document.querySelectorAll('input[name="penalty"]').forEach(el=>el.addEventListener('change',()=>{const b=answer(id);b.penalty=Number(el.value);b.verified=false;if(b.penalty===0)b.topics=[];save();$('topicWrap').innerHTML=b.penalty>0?topicPicker(normalized(b)):'';$('noteLabel').textContent=b.penalty>0?'矛盾依据（必填）':'备注（可选）';wireTopics(id);progress();}));
+ wireTopics(id);
+ $('note').addEventListener('input',e=>{answer(id).note=e.target.value;answer(id).verified=false;save();progress();});
+ $('previous').onclick=()=>goto(state.index-1);
+ $('confirm').onclick=()=>{const b=normalized(answer(id));if(b.penalty>0&&b.topics.length===0){$('error').textContent='设置了矛盾扣分，请指出与哪一条自述矛盾。';return;}if(b.penalty>0&&!b.note.trim()){$('error').textContent='设置了矛盾扣分，请填写直接冲突的依据。';return;}state.answers[id]={...b,verified:true};save();let next=state.index+1;goto(next);};}
+function wireTopics(id){document.querySelectorAll('[data-topic]').forEach(el=>el.addEventListener('change',()=>{const a=answer(id);let x=new Set(a.topics);el.checked?x.add(el.dataset.topic):x.delete(el.dataset.topic);a.topics=[...x];a.verified=false;save();progress();}));}
+function renderFinish(){$('originalDetails').open=false;$('originalDetails').hidden=true;$('reviewControls').innerHTML='';$('portraitStep').textContent=`${ITEMS.length} / ${ITEMS.length}`;$('portraitCode').textContent='本轮审核已完成';$('portraitLeft').textContent='全部匿名条目已审核。正式提交前不显示算法来源或成绩。';$('pageTitle').textContent='审核完成';$('position').textContent='成绩和来源尚未揭示';const n=reviewed();$('content').innerHTML=`<div class="callout"><h2>已完成 ${n} / ${ITEMS.length} 条审核</h2><p>确认提交之后，页面才会显示两组画像的覆盖分、矛盾扣分和最终得分。</p><p class="help">事实点按最高命中等级（1–5）折算，同一事实无论出现几次都只计一次；同一自述的重复矛盾也不会按出现次数重复扣分。</p></div><div class="actions"><button id="return">返回修改</button><button id="submit" class="primary" ${n===ITEMS.length?'':'disabled'}>正式提交并查看结果</button></div>`;$('reviewControls').innerHTML=`<div class="right-scoring-title">审核已完成</div><p class="help">${n} / ${ITEMS.length} 条已确认。正式提交后才揭示分数和来源。</p><div class="actions right-actions"><button id="returnRight">返回修改</button><button id="submitRight" class="primary" ${n===ITEMS.length?'':'disabled'}>正式提交并查看结果</button></div>`;
+ const submit=()=>{if(reviewed()!==ITEMS.length)return;if(!confirm('确认全部条目已审核，正式提交并揭示两组评分？提交后将显示算法来源。'))return;state.submitted_at=new Date().toISOString();save();render();};
+ $('return').onclick=()=>goto(ITEMS.length-1);$('returnRight').onclick=()=>goto(ITEMS.length-1);$('submit').onclick=submit;$('submitRight').onclick=submit;}
+function sourceKey(){// Decode only after formal submission: the visible questionnaire carries no source labels.
+ if(!state.submitted_at)throw Error('Not submitted');return JSON.parse(decodeURIComponent(escape(atob(SEALED_KEY))));}
+function calculate(){
+ if(!state.submitted_at)throw Error('Not submitted');
+ const map=sourceKey(),result={};
+ for(const kind of ['summary','direct']){
+  const ids=ITEMS.filter(i=>map[i.id].system===kind).map(x=>x.id);
+  const strongest={}; // 每个事实点只取该算法各条画像中的最高命中等级
+  const perP={};SELF.forEach(s=>perP[s.id]=0);
+  let rawPenalty=0;
+  for(const id of ids){
+   const a=normalized(state.answers[id]);
+   a.hits.forEach(fid=>{strongest[fid]=Math.max(strongest[fid]||0,a.hitLevels[fid]??5);});
+   rawPenalty+=a.penalty||0;
+   if(a.penalty>0&&a.topics.length){const share=a.penalty/a.topics.length;for(const p of a.topics)perP[p]=Math.max(perP[p],share);}
+  }
+  const groups=SELF.map(s=>{
+   const fs=FACTS.filter(x=>x.pid===s.id);
+   const score=fs.reduce((sum,p)=>sum+p.weight*(strongest[p.id]||0)/5,0);
+   return {id:s.id,score,total:10,deduction:perP[s.id]};
+  });
+  const coverage=groups.reduce((x,g)=>x+g.score,0),deduction=Object.values(perP).reduce((a,b)=>a+b,0);
+  const pointScores=FACTS.map(f=>({id:f.id,weight:f.weight,bestLevel:strongest[f.id]||0,score:f.weight*(strongest[f.id]||0)/5}));
+  result[kind]={items:ids.length,pointCount:Object.keys(strongest).length,coverage,rawPenalty,deduction,final:Math.max(0,coverage-deduction),groups,perP,pointScores};
+ }
+ return result;
+}
+function fmt(x){return (Math.round(x*100)/100).toFixed(2).replace(/\.00$/,'');}
+function renderResult(){$('originalDetails').open=false;$('originalDetails').hidden=true;$('reviewControls').innerHTML='';$('portraitStep').textContent='已提交';$('portraitCode').textContent='评分结果已揭示';$('portraitLeft').textContent='全部 51 条画像已审核并正式提交。加权评分结果显示在左侧。';$('pageTitle').textContent='审核结果（提交后揭盲）';$('position').textContent=`提交于 ${new Date(state.submitted_at).toLocaleString('zh-CN')}`;const r=calculate();const w=r.summary.final>r.direct.final?'Summary':r.direct.final>r.summary.final?'Direct':'两组相同';const gap=Math.abs(r.summary.final-r.direct.final);let html=`<div class="callout">这份成绩仅在提交后展示。事实点按各条画像的最高命中程度加权（1–5 对应 20%–100%），每个事实点只计一次；同一自述的重复矛盾扣分取最高值。<strong>当前结果：${esc(w)}${w==='两组相同'?'':` 领先 ${fmt(gap)} 分`}</strong>。</div><div class="resultgrid">${['summary','direct'].map(k=>`<div class="stat"><div class="caps">${k==='summary'?'SUMMARY':'DIRECT'}</div><div class="value">${fmt(r[k].final)} <span class="dim">/ 100</span></div><p>加权事实覆盖 ${fmt(r[k].coverage)} 分</p><p>矛盾扣分 −${fmt(r[k].deduction)} 分</p><p>唯一命中 ${r[k].pointCount} / ${FACTS.length} 点（取最高等级） · ${r[k].items} 条画像</p></div>`).join('')}</div><h3>按 10 条自述分项统计</h3><div class="tablebox"><table><thead><tr><th>B 自述</th><th>Summary 覆盖</th><th>Direct 覆盖</th><th>Summary 矛盾扣分</th><th>Direct 矛盾扣分</th></tr></thead><tbody>${SELF.map(s=>{const a=r.summary.groups.find(x=>x.id===s.id),b=r.direct.groups.find(x=>x.id===s.id);return `<tr><td>${s.id}</td><td class="num">${fmt(a.score)} / 10</td><td class="num">${fmt(b.score)} / 10</td><td class="num">${fmt(a.deduction)}</td><td class="num">${fmt(b.deduction)}</td></tr>`;}).join('')}</tbody></table></div><details><summary>查看命中事实点与原始条目的算法来源</summary>${['summary','direct'].map(k=>{const map=sourceKey();const ids=ITEMS.filter(x=>map[x.id].system===k);const hit=new Set();ids.forEach(it=>(state.answers[it.id]?.hits||[]).forEach(p=>hit.add(p)));return `<h3>${k}：${ids.length} 条</h3><p>唯一覆盖（最高等级与加权得分）：${r[k].pointScores.filter(x=>x.bestLevel>0).map(x=>esc(x.id+' '+byPoint[x.id].label+' · '+x.bestLevel+'/5 · '+fmt(x.score)+'/'+x.weight+'分')).join('；')||'无'}</p><p class="help">条目映射：${ids.map(x=>esc(map[x.id].row+' / '+x.id)).join('；')}</p>`;}).join('')}</details><div class="actions"><button id="downloadResult">导出完整评分 JSON</button><button id="downloadCsv">导出分项 CSV</button><button id="undo">撤回提交，继续编辑</button></div><div class="callout"><strong>计分说明：</strong>每个事实点的分数＝权重 ×（最佳命中等级 / 5）；同一算法重复命中仅取最高等级，总覆盖分满分 100。矛盾每条选 0–5 分，若涉及多条自述则等分；同组同一自述的矛盾只保留最大扣分。最终分 = max(0,覆盖分 − 去重后的矛盾扣分)。B 未提及的画像信息不自动记为矛盾。</div>`;
+ $('content').innerHTML=html;$('downloadResult').onclick=()=>exportData(true);$('downloadCsv').onclick=exportCsv;$('undo').onclick=()=>{if(confirm('撤回提交会隐藏成绩并允许编辑，已填答案不会丢失。是否继续？')){state.submitted_at=null;save();goto(0);}};}
+function payload(withScores){const o={schema:SCHEMA,reviewer:state.reviewer||'anonymous',exported_at:new Date().toISOString(),created_at:state.created_at,index:state.index,submitted_at:state.submitted_at,reviewed:reviewed(),total:ITEMS.length,order:state.order,responses:state.order.map(id=>({item_id:id,...normalized(state.answers[id])}))};if(withScores&&state.submitted_at){o.scoring_method='sum over unique gold facts: weight * max hit level(1..5)/5, then subtract max contradiction by self-statement (0..5 per row, divided between selected statements)';o.results=calculate();}return o;}
+function download(name,str,type='application/json;charset=utf-8'){const blob=new Blob([str],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);}
+function exportData(withScores){state.reviewer=$('reviewer').value.trim();save();const s=payload(withScores);download(`portrait_review_HW_v5_3_${(state.reviewer||'anonymous').replace(/[^a-zA-Z0-9_-]/g,'_')}.json`,JSON.stringify(s,null,2));}
+function exportCsv(){const r=calculate(),rows=[['自述','Summary加权覆盖','Direct加权覆盖','Summary矛盾扣分','Direct矛盾扣分']];SELF.forEach((s,i)=>rows.push([s.id,r.summary.groups[i].score,r.direct.groups[i].score,r.summary.groups[i].deduction,r.direct.groups[i].deduction]));rows.push(['总覆盖',r.summary.coverage,r.direct.coverage,'','']);rows.push(['总矛盾扣分','','',r.summary.deduction,r.direct.deduction]);rows.push(['最终得分',r.summary.final,r.direct.final,'','']);download('portrait_review_HW_v5_3_score.csv','\ufeff'+rows.map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
+function loadProgress(text){
+ let d;
+ try{d=JSON.parse(text);}catch(e){alert('文件不是有效 JSON');return;}
+ if(!validImport(d)){alert('不是这份新 B（HW）审核问卷的兼容进度文件');return;}
+ if(!confirm('导入记录将覆盖本页面当前答案。确定继续吗？'))return;
+ const next={schema:SCHEMA,reviewer:String(d.reviewer||''),index:0,order:[...d.order],answers:{},submitted_at:null,created_at:String(d.created_at||new Date().toISOString())};
+ const rows=Array.isArray(d.responses)?d.responses:Object.entries(d.answers||{}).map(([item_id,a])=>({item_id,...a}));
+ for(const a of rows)if(Object.hasOwn(byId,a.item_id))next.answers[a.item_id]=normalized(a);
+ // 保留原审核位置。旧版导出的 JSON 没有 index 时，自动定位第一个未完成的条目。
+ const firstIncomplete=next.order.findIndex(id=>!good(next.answers[id]));
+ next.index=Number.isInteger(d.index)&&d.index>=0&&d.index<=ITEMS.length?d.index:(firstIncomplete<0?ITEMS.length:firstIncomplete);
+ // 只允许已完成 51 条的文件恢复“已提交”状态，防止有缺项时提前展示成绩。
+ const allDone=next.order.every(id=>good(next.answers[id]));
+ if(d.submitted_at&&allDone){next.submitted_at=String(d.submitted_at);next.index=ITEMS.length;}
+ state=next;save();render();
+}
+$('reviewer').oninput=e=>{state.reviewer=e.target.value;save();};$('jump').onchange=e=>{if(!state.submitted_at)goto(Number(e.target.value));};$('saveDraft').onclick=()=>exportData(!!state.submitted_at);$('loadDraft').onclick=()=>$('draftFile').click();$('draftFile').onchange=e=>{const f=e.target.files[0];if(f)f.text().then(loadProgress);e.target.value='';};$('restart').onclick=()=>{if(!confirm('清空全部答案，生成新的随机顺序？此操作不可撤销。'))return;state=fresh();save();render();};
+save();render();
+</script></body></html>

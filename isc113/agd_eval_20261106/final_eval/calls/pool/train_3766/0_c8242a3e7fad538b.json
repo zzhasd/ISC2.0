@@ -1,0 +1,1134 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Wow , that terrible movie is finally over . Next time I ’ m picking the film , because I don ’ t want to end up seeing a chick flick ."
+        },
+        {
+          "turn_id": 3,
+          "text": "Not everything , just this film . Even the title is ridiculous , and it ’ s so long , those are the two and a half most wasted hours of my life , so much so that I ’ m thinking about asking them to give me my money back ."
+        },
+        {
+          "turn_id": 5,
+          "text": "I ’ m only complaining about a movie that I could have rented or bought and then thrown in the garbage ."
+        },
+        {
+          "turn_id": 7,
+          "text": "Next time , go with your gay friend who is more in touch with his feelings ."
+        },
+        {
+          "turn_id": 9,
+          "text": "Love stories ? More like one-night-stands ."
+        },
+        {
+          "turn_id": 11,
+          "text": "My friends ? Fat ? What about those whales you call friends ?"
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B made a generalization that A dislikes everything or many things",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B chose the film for this outing",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B chose the film they watched.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B has a gay friend",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B has a gay friend.",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B suggested A doesn't like anything.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B has a gay friend.",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B has a gay friend",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B called A's friends fat.",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "A describes B's gay friend as more in touch with his feelings",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B has friends whom A considers fat.",
+          "turn_ids": [
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B has friends that A considers fat",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B has a friend who is gay",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B called A's friends fat",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B has friends that A considers fat",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B has friends that A considers fat",
+          "turn_ids": [
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B referred to the movie (or its genre) as 'love stories'.",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B's gay friend is more in touch with his feelings",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B has friends (plural) whom A considers fat.",
+          "turn_ids": [
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B picked/chose the movie that A and B just watched together",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B called A's friends fat",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B suggested that A complains about everything",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "A sarcastically suggests B should go with that gay friend next time instead of A.",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B used the term 'love stories' to describe the movie or genre",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B has friends",
+          "turn_ids": [
+            7,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B's gay friend is described by A as more in touch with his feelings",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B watched the terrible movie together with A",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B and A watched a movie together",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B has friends whom A describes as fat (whales).",
+          "turn_ids": [
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B characterized the movie as a love story.",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "A considers the movie a chick flick",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "B called A's friends fat",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0032",
+          "claim": "B chose/picked the movie they watched together",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0033",
+          "claim": "B made a generalizing statement about A",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0034",
+          "claim": "The film B chose was a chick flick",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0035",
+          "claim": "The movie B watched with A was approximately two and a half hours long",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0036",
+          "claim": "B went to see this movie with A",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0037",
+          "claim": "B made a generalizing criticism implying A complains about everything",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0038",
+          "claim": "The movie they watched was approximately two and a half hours long",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0039",
+          "claim": "B has a gay friend",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0040",
+          "claim": "B picked the film they watched together this time",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0041",
+          "claim": "B mentioned or characterized the movie as a love story",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0042",
+          "claim": "A and B watched the movie together at a theater",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0043",
+          "claim": "B has a gay friend",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0044",
+          "claim": "B watched a movie with A",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0045",
+          "claim": "B has friends that A considers fat",
+          "turn_ids": [
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0046",
+          "claim": "B has a gay friend",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0047",
+          "claim": "B has friends that A considers overweight",
+          "turn_ids": [
+            11
+          ],
+          "level": "E1"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B chose/picked the movie that A and B watched together.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "chose/picked",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "the film/movie",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "context",
+            "value": "for this outing / they watched together",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0032",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0040",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B and A watched a movie together at a theater.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "event",
+            "value": "watched a movie together",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "participants",
+            "value": "B and A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "location",
+            "value": "at a theater",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0036",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0042",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0044",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B has a gay friend.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "has",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "a gay friend",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0039",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0043",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0046",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B's gay friend is more in touch with his feelings, as described by A.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "entity",
+            "value": "B's gay friend",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "attribute",
+            "value": "more in touch with his feelings",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "source",
+            "value": "A's description",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "A sarcastically suggests B should go with the gay friend next time instead of A.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "A sarcastically suggests",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "content",
+            "value": "B should go with the gay friend next time",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "contrast",
+            "value": "instead of A",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B called A's friends fat.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "called",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "A's friends",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "attribute",
+            "value": "fat",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "B has friends (plural) whom A considers fat/whales.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "has friends",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "attribute",
+            "value": "A considers them fat/whales",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "plurality",
+            "value": "plural",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0045",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0047",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f8",
+        "canonical_claim": "B made a generalization implying A complains about or doesn't like everything.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "made a generalization / suggested",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "content",
+            "value": "A complains about / doesn't like everything",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0033",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0037",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f9",
+        "canonical_claim": "B characterized the movie as a love story.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "characterized / referred to",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "the movie / its genre",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "description",
+            "value": "love story / love stories",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0041",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f10",
+        "canonical_claim": "The movie was a chick flick.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "entity",
+            "value": "the movie / the film B chose",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "genre",
+            "value": "chick flick",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "perspective",
+            "value": "A's characterization",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0034",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f11",
+        "canonical_claim": "The movie B watched with A was approximately two and a half hours long.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "entity",
+            "value": "the movie they watched",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "duration",
+            "value": "approximately two and a half hours",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0035",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0038",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 9269,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7113,
+      "text_tokens": 9269
+    },
+    "prompt_tokens": 2528,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 2528
+    },
+    "total_tokens": 11797
+  }
+}

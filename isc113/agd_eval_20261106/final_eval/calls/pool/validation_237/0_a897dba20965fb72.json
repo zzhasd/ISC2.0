@@ -1,0 +1,724 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Hey Joe , what are you doing in this department store ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "Why not ? When I go shoe shopping , I have so many options for sneakers that I spend awhile looking at all of the choices ."
+        },
+        {
+          "turn_id": 5,
+          "text": "What do you mean ? This is a big store , isn't it ?"
+        },
+        {
+          "turn_id": 7,
+          "text": "So how do you usually go about buying shoes , then ?"
+        },
+        {
+          "turn_id": 9,
+          "text": "Well , you're in the right store . If they don't have it , no one will ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B buys shoes habitually",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B does not enjoy or prefer browsing many shoe options",
+          "turn_ids": [
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is looking for a specific shoe or footwear item",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B is looking for shoes at the department store",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B has a usual method for buying shoes",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B has a habitual way of buying shoes",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B has a usual method for buying shoes that differs from browsing many options in a department store",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B is looking for a specific item in the store",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B's name is Joe",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B has a specific shoe or item in mind that they are looking for",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "The hidden partner is shopping for shoes",
+          "turn_ids": [
+            3,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B regularly buys shoes",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "The hidden partner is currently in a department store",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "The hidden partner is named Joe",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B is in a department store",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B has a habitual or usual method for buying shoes that differs from in-store browsing",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B is named Joe",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B is named Joe",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B has a specific alternative method for buying shoes that differs from browsing in stores",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B is called Joe.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B is shopping for something specific that this store carries",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B said something suggesting the store is not big or does not have enough options",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "The hidden partner expressed that the store is not big",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B is shopping for shoes",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B is currently in a department store",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B has a method of buying shoes that differs from browsing many options in a department store",
+          "turn_ids": [
+            3,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B is in the right store for what B is looking for",
+          "turn_ids": [
+            9
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "The hidden partner is seeking a specific item",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B is looking for a specific shoe that may be hard to find",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B's name is Joe",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "The hidden partner is in a department store",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "B is in a department store",
+          "turn_ids": [
+            1,
+            5
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B's name is Joe",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "name",
+            "value": "Joe",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B is currently in a department store",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "location",
+            "value": "department store",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "state",
+            "value": "currently present",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B is shopping for a specific shoe at the department store that may be hard to find",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "activity",
+            "value": "shopping for shoes",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "specificity",
+            "value": "a specific shoe or item",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "location",
+            "value": "department store",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "availability",
+            "value": "the store carries it",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s5",
+            "name": "difficulty",
+            "value": "may be hard to find",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s5"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B has a habitual or usual method for buying shoes that differs from browsing many options in a department store",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "habit",
+            "value": "habitual / usual method",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "buying shoes",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "contrast",
+            "value": "differs from browsing many options in a department store",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B does not enjoy or prefer browsing many shoe options",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "preference",
+            "value": "does not enjoy or prefer",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "browsing many shoe options",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B suggested the store is not big or does not have enough options",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "statement",
+            "value": "store is not big / lacks options",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "B is in the right store for what B is looking for",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "assessment",
+            "value": "right store",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "purpose",
+            "value": "for what B is looking for",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 5541,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3646,
+      "text_tokens": 5541
+    },
+    "prompt_tokens": 1857,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1857
+    },
+    "total_tokens": 7398
+  }
+}

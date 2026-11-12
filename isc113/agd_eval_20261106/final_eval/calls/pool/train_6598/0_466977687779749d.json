@@ -1,0 +1,687 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Look out ! A small boy is rushing out blindly ."
+        },
+        {
+          "turn_id": 3,
+          "text": "You stopped just in time . Good for you !"
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B was in a situation where a small boy rushing out posed an immediate danger to B.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B was in the path of or near a small boy who was rushing out blindly.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "The hidden partner was in a vehicle or moving object capable of stopping to avoid a rushing boy",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B stopped just in time",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B stopped just in time to avoid the small boy rushing out",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "The hidden partner was in motion before stopping.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B was in a position where the rushing boy could have reached them",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B was in a position on a path or road where a small boy rushing out blindly could have collided with B",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B was moving before stopping",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B required A's verbal warning to take evasive action.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "The hidden partner stopped",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B stopped just in time when a small boy rushed out blindly",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B is driving.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "The hidden partner was operating a vehicle or moving object at the time of the event",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B stopped at the last possible moment to avoid the boy",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "The hidden partner was in a position where the small boy could have reached them.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "The hidden partner was in a position where they could have been struck by the small boy.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B was initially unaware of the approaching boy.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B was driving a vehicle",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "A praised B's reaction with 'Good for you!', indicating B's stop was a successful evasive action that A recognized as commendable",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B was not initially aware of the approaching boy before being warned",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B stopped.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B was moving/walking before stopping.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B was likely operating a vehicle or moving object that could be stopped to avoid hitting the boy",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B stopped just in time to avoid a small boy who was rushing out blindly.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "The hidden partner stopped just in time to avoid the small boy.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B received praise from A for their quick reaction.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "The hidden partner reacted to the warning by stopping.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B narrowly avoids hitting a small boy.",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E1"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B stopped just in time to avoid a small boy who was rushing out blindly.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "stopped",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "timing",
+            "value": "just in time / at the last possible moment",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "object",
+            "value": "a small boy",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s4",
+            "name": "boy_manner",
+            "value": "rushing out blindly",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s5",
+            "name": "purpose_outcome",
+            "value": "to avoid hitting / colliding with the boy",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s6",
+            "name": "spatial_context",
+            "value": "B was in the path or position where the boy could have reached or collided with B",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s7",
+            "name": "danger",
+            "value": "immediate danger of being struck",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1",
+              "s3",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s3",
+              "s4",
+              "s7"
+            ]
+          },
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s3",
+              "s4",
+              "s6"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s4",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s6"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s3",
+              "s4",
+              "s6",
+              "s7"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s3",
+              "s6"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s3",
+              "s7"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s4",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s5"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B was driving / operating a vehicle or moving object at the time of the event.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "mode",
+            "value": "driving / operating",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "a vehicle or moving object",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B was in motion before stopping.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "prior_state",
+            "value": "moving / in motion",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "temporal_relation",
+            "value": "before stopping",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B was initially unaware of the approaching boy and reacted to A's verbal warning by stopping.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "awareness_state",
+            "value": "initially unaware of the approaching boy",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "trigger",
+            "value": "A's verbal warning",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "response",
+            "value": "stopped / took evasive action",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "A praised B with 'Good for you!' for the successful quick reaction of stopping in time.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "praised",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "praise_content",
+            "value": "Good for you!",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "reason",
+            "value": "B's quick / successful evasive reaction",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 6704,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4847,
+      "text_tokens": 6704
+    },
+    "prompt_tokens": 1747,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1747
+    },
+    "total_tokens": 8451
+  }
+}

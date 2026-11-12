@@ -1,0 +1,850 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "What a nice dress , Jean.You look marvelous !"
+        },
+        {
+          "turn_id": 3,
+          "text": "From the Crown's . Oh , what lovely earrings you have ! Are they diamond ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "Well , you are lucky to have such a considerate husband . Mine hasn't brought me a single rose since we married ."
+        },
+        {
+          "turn_id": 7,
+          "text": "She's chic , isn't she ?"
+        },
+        {
+          "turn_id": 9,
+          "text": "It makes me feel rather shabby . That woman has a good taste in dressing , I would say ."
+        },
+        {
+          "turn_id": 11,
+          "text": "Most women follow fashion like sheep.They don't know any better than imitate ."
+        },
+        {
+          "turn_id": 13,
+          "text": "The gown is quite expensive , believe me ."
+        },
+        {
+          "turn_id": 15,
+          "text": "You know those upstarts . They're all show-offs ! I think I'd better have a diet ; otherwise I'd look like a ballon soon ."
+        },
+        {
+          "turn_id": 17,
+          "text": "Thanks . I'm flattered ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B is wearing earrings",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B's husband is considerate",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is called Jean",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B said something flattering to A",
+          "turn_ids": [
+            17
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B has a considerate husband.",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B is wearing earrings.",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "Jean has a husband",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "Jean is female",
+          "turn_ids": [
+            1,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B is married",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B is married.",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B's name is Jean",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B looks marvelous in the dress",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B has earrings",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "The hidden partner has a husband",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B is present at a social gathering where A comments on attire and jewelry",
+          "turn_ids": [
+            1,
+            3,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B is named Jean",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "Jean has a dress",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "Jean possesses earrings",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B is female",
+          "turn_ids": [
+            1,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B's name is Jean.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B is wearing a dress",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B's husband brought B roses",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B is a woman in a context of dressing and fashion",
+          "turn_ids": [
+            1,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "Jean looks marvelous",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B is wearing a dress",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B is married and has a husband",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B is wearing a dress.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "Jean has earrings",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B is named Jean",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B's husband has brought B a rose",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "B has a considerate husband",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "B said something complimentary to A",
+          "turn_ids": [
+            17
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0032",
+          "claim": "Jean is married to a considerate husband",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0033",
+          "claim": "Jean was complimented on her appearance",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0034",
+          "claim": "Jean's husband is considerate",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0035",
+          "claim": "B has a husband",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B's name is Jean.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "name",
+            "value": "Jean",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B is wearing a dress.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "clothing",
+            "value": "dress",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "state",
+            "value": "wearing",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B looks marvelous in the dress and was complimented on her appearance by A.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "appearance",
+            "value": "marvelous",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "context",
+            "value": "in the dress",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "event",
+            "value": "complimented on appearance",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0033",
+            "slot_ids": [
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B is wearing / has earrings.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "accessory",
+            "value": "earrings",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "state",
+            "value": "wearing/possessing",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B's husband is considerate.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "husband",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "quality",
+            "value": "considerate",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0032",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0034",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B is married and has a husband.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "marital_status",
+            "value": "married",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "relation",
+            "value": "has a husband",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0035",
+            "slot_ids": [
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "B's husband brought B roses.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "agent",
+            "value": "B's husband",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "action",
+            "value": "brought roses",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "recipient",
+            "value": "B",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f8",
+        "canonical_claim": "B is female.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "gender",
+            "value": "female",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f9",
+        "canonical_claim": "B said something complimentary/flattering to A.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "said something complimentary",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "target",
+            "value": "A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f10",
+        "canonical_claim": "B is present at a social gathering where A comments on attire and jewelry.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "setting",
+            "value": "social gathering",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "context",
+            "value": "A comments on attire and jewelry",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 5918,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3681,
+      "text_tokens": 5918
+    },
+    "prompt_tokens": 1987,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1987
+    },
+    "total_tokens": 7905
+  }
+}

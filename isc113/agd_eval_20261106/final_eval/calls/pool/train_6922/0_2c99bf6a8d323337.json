@@ -1,0 +1,608 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Excuse me . I am looking for a book called Little Women , but I can't find it anywhere ."
+        },
+        {
+          "turn_id": 3,
+          "text": "Will you have it later ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "That's terrific . Thank you ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B is working in a bookshop.",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B provided A with a positive or helpful response regarding the book's future availability, which A found satisfactory",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B works in a context where books are available to the public",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B did not have the book Little Women available at the time of the interaction",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B is at a service point where customers approach them to ask questions",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "The hidden partner has the ability to order or acquire books for the location",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B was in a position to be asked about the availability of a specific book (Little Women), indicating B manages or has access to a book inventory",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "The hidden partner works at a location that stocks or sells books",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B works at a location that provides or sells books where customers search for titles",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B said something that A found terrific and thanked B for",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B is in a position to have access to a copy of the book Little Women",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B indicated to A that the book Little Women would be available later",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B is in a position where A expects B could potentially have or obtain the book Little Women",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "The hidden partner occupies a service role relative to the observer",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B is in a position where they might have the book Little Women available later",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B is the entity expected to possess or control the book's availability",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B will have the book 'Little Women' later (or can provide it)",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B does not currently have the book 'Little Women' available in stock or on the shelf",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B does not currently have the book 'Little Women' available",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B gave a positive response to A's question about the book",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "A physically searched for Little Women at B's location and could not find it",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "The hidden partner is in a role where they can help customers find books",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B represents a book retailer.",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "The hidden partner has knowledge about book inventory or stock availability",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B works in a bookshop (book retail/service location) where customers approach to search for and inquire about books, and B has knowledge of or access to book inventory.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "role",
+            "value": "working / service role",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "location_type",
+            "value": "bookshop / book retailer / location that stocks or sells books",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "function",
+            "value": "books available to public; customers approach to ask questions; help customers find books; knowledge of book inventory/stock",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B did not have the book 'Little Women' available (in stock or on the shelf) at the time of the interaction.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "object",
+            "value": "Little Women",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "state",
+            "value": "not available / not in stock / not on shelf",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "time",
+            "value": "at the time of the interaction / currently",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B indicated to A that the book 'Little Women' would be available later (or that B can provide/order it), and B is in a position to control or acquire the book's availability.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "object",
+            "value": "Little Women",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "future_availability",
+            "value": "available later / B will have or can provide it",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "ability",
+            "value": "ability to order or acquire books; in a position to access or obtain the book",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "communication",
+            "value": "B indicated to A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B gave a positive/helpful response regarding the book's future availability, which A found terrific and satisfactory, prompting A to thank B.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "response_type",
+            "value": "positive / helpful response",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "topic",
+            "value": "the book's future availability / A's question about the book",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "A_reaction",
+            "value": "A found it terrific / satisfactory and thanked B",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "A physically searched for 'Little Women' at B's location and could not find it.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "physically searched",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "Little Women",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "location",
+            "value": "B's location",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "result",
+            "value": "could not find it",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s4"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 5220,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3433,
+      "text_tokens": 5220
+    },
+    "prompt_tokens": 1623,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1623
+    },
+    "total_tokens": 6843
+  }
+}

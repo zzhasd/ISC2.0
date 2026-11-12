@@ -1,0 +1,171 @@
+{
+  "method": "cover_v1",
+  "stages": [
+    {
+      "stage": "inventory/0",
+      "claims": [],
+      "coverage": [
+        {
+          "turn_id": 1,
+          "status": "no_fact",
+          "reason": "A asks about room availability and states own preference for a single room; no personal fact about B is revealed."
+        },
+        {
+          "turn_id": 3,
+          "status": "no_fact",
+          "reason": "A states a date and asks about closed circuit TV; no attribute of B is recoverable."
+        },
+        {
+          "turn_id": 5,
+          "status": "no_fact",
+          "reason": "A asks about laundry service; the answer is unknown and no B fact is stated or presupposed."
+        }
+      ]
+    },
+    {
+      "stage": "relational",
+      "claims": [
+        {
+          "claim": "B is working at a hotel or lodging establishment where rooms are rented",
+          "attribute": "occupation/location",
+          "mechanism": "A asks B about room availability, single room preference, closed circuit TV, and laundry service — all standard hotel front-desk inquiries",
+          "evidence": [
+            {
+              "turn_id": 1,
+              "quote": "is there any room available ? I want a single one ."
+            },
+            {
+              "turn_id": 3,
+              "quote": "is there a closed circuit TV ?"
+            },
+            {
+              "turn_id": 5,
+              "quote": "What about laundry ?"
+            }
+          ],
+          "evidence_span_valid": true,
+          "quote_repairs": [],
+          "invalid_evidence": []
+        },
+        {
+          "claim": "B indicated a timeframe for room availability that A responded to with 'Next Today'",
+          "attribute": "event",
+          "mechanism": "'Next Today' is an elliptical response to B's prior statement about when a room becomes available, implying B mentioned a scheduling detail",
+          "evidence": [
+            {
+              "turn_id": 3,
+              "quote": "Next Today ."
+            }
+          ],
+          "evidence_span_valid": true,
+          "quote_repairs": [],
+          "invalid_evidence": []
+        }
+      ],
+      "coverage": []
+    },
+    {
+      "stage": "coverage/0",
+      "claims": [],
+      "coverage": [
+        {
+          "turn_id": 1,
+          "status": "no_fact",
+          "reason": "A asks about room availability and single room; already captured by retained claim about B working at lodging establishment"
+        },
+        {
+          "turn_id": 3,
+          "status": "no_fact",
+          "reason": "'Next Today' is A's response to an unknown B utterance (not recoverable); closed circuit TV question is consistent with existing retained claim, no new independent B fact"
+        },
+        {
+          "turn_id": 5,
+          "status": "no_fact",
+          "reason": "Laundry question is consistent with existing retained claim about B at lodging establishment; no additional independent B fact"
+        }
+      ]
+    }
+  ],
+  "reviews": [
+    {
+      "stage": "review",
+      "original_claim": "B is working at a hotel or lodging establishment where rooms are rented",
+      "id": "c1",
+      "verdict": "keep",
+      "level": "E2",
+      "checks": {
+        "subject": true,
+        "predicate": true,
+        "arguments": true,
+        "time": true,
+        "polarity": true,
+        "modality": true,
+        "informative": true
+      },
+      "evidence": [
+        {
+          "turn_id": 1,
+          "quote": "is there any room available ? I want a single one ."
+        },
+        {
+          "turn_id": 3,
+          "quote": "is there a closed circuit TV ?"
+        },
+        {
+          "turn_id": 5,
+          "quote": "What about laundry ?"
+        }
+      ],
+      "basis": "A's opening with 'Excuse me' and sequential service questions about room availability, CCTV, and laundry entail B is in a position to answer these, i.e. works at a hotel or lodging establishment.",
+      "alternative": "",
+      "replacement": null,
+      "accepted": true,
+      "citation_valid": true,
+      "quote_repairs": [],
+      "invalid_evidence": []
+    },
+    {
+      "stage": "review",
+      "original_claim": "B indicated a timeframe for room availability that A responded to with 'Next Today'",
+      "id": "c2",
+      "verdict": "reject",
+      "level": "E4",
+      "checks": {
+        "subject": true,
+        "predicate": false,
+        "arguments": false,
+        "time": true,
+        "polarity": true,
+        "modality": true,
+        "informative": false
+      },
+      "evidence": [
+        {
+          "turn_id": 3,
+          "quote": "Next Today ."
+        }
+      ],
+      "basis": "'Next Today' is most naturally read as A's own temporal specification (when A needs the room), not a response to a timeframe B indicated. The candidate invents a B action (indicating a timeframe) that is not supported by the visible text.",
+      "alternative": "A is specifying that they need the room starting today or the next available slot today.",
+      "replacement": null,
+      "accepted": false,
+      "citation_valid": true,
+      "quote_repairs": [],
+      "invalid_evidence": []
+    }
+  ],
+  "item_id": "dailydialog/validation_717/A_to_B",
+  "candidate_count": 2,
+  "final_claims": 1,
+  "empty_reason": null,
+  "task_ids": [
+    "15736071089db2f17386316c0b93c45819731a9fb91cc177338999dc85ee648a",
+    "334f72307d50775762e015d01ed8118bccae5458f8750c84074b0d13456bc42a",
+    "614365e7b28921f12a48775f27a4ecd3746eb2e32da4a05b92d294a748e0e378",
+    "ae2a8917942c6aa86f3bd39fb06187539f8b7265954b65e4efa02e3aa0ce84bd"
+  ],
+  "ablation": {
+    "completion": true,
+    "repair": true
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "item_id": "dailydialog/train_5244/A_to_B",
+  "stages": {
+    "E1_ledger": {
+      "count": 3,
+      "valid_spans": 3
+    },
+    "E2_mechanisms": {
+      "count": 6,
+      "valid_spans": 6
+    },
+    "targeted_completion": {
+      "count": 0,
+      "valid_spans": 0
+    }
+  },
+  "invalid": [],
+  "candidate_count": 9,
+  "decisions": [
+    {
+      "id": "c1",
+      "claim": "B is a waiter",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "coreference",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "Turn 1 directly addresses B as 'Waiter', explicitly identifying B's role.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c2",
+      "claim": "B brought A a menu that is in French",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "explicit",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "Turn 5 explicitly states 'this is in French' after thanking B, confirming B brought a French menu.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c3",
+      "claim": "B came back to check on A's order after A requested a minute",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "Turn 9 presupposes B returned (A apologizes for not deciding), following Turn 7's request to come back.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c4",
+      "claim": "B is a waiter at a restaurant",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c1",
+      "reason": "Adds 'at a restaurant' which is a reasonable presupposition from waiter+menu context, but c1 already captures the core identity; c4 is a weaker projection of the same fact plus inferred setting.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c5",
+      "claim": "B brought the menu to A",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c2",
+      "reason": "Presupposes B brought the menu (from 'Thank you' in Turn 5), but c2 already states this more completely with the French detail.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c6",
+      "claim": "The menu B brought was in French",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c2",
+      "reason": "States the menu was in French, which is a component of c2's more complete claim 'B brought A a menu that is in French'.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c7",
+      "claim": "B brought the English menu to A",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "Turn 7's 'Thanks' after requesting the English menu in Turn 5 presupposes B provided it.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c8",
+      "claim": "B returned to check on A's order",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c3",
+      "reason": "Same presupposition as c3 (B returned to check), but c3 adds the temporal link to Turn 7's request, making it more complete.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c9",
+      "claim": "B works at a restaurant that has menus in both French and English",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "reject",
+      "level": "E3",
+      "same_as": "",
+      "reason": "Infers B 'works at' a restaurant with both menus from the dialogue; the restaurant's menu inventory is not established by A's turns—B could have fetched a menu from elsewhere.",
+      "counterexample": "",
+      "action": "reject_unsupported"
+    }
+  ],
+  "review_second_opinion": {
+    "reviewed": 1,
+    "restored": 0
+  },
+  "final_claims": 4,
+  "generic_claims_kept": 1,
+  "api_task_ids": [
+    "b83ae6889ba0bdd882b8d66db0ef8a0c0ad19822877f7ceeb7d829750b928fa8",
+    "bb8e56822e1033619778ad6dc0ee997dc35e1a79b4edc377a0c76820dce74975",
+    "9b14e91ff7a9f28008f52c4f17679ed37b29b7d2e9d2defbe814af457a1b93da",
+    "11cde23ff09558051789b07e79390d09014f181f18aac05a85d59cfa4486fea4",
+    "fcd40e2edd816b379722d2881294bc8af687b386b54ac8ff54380bdea8c69319"
+  ],
+  "design": "relation-preserving E1/E2 + independent dispute review"
+}

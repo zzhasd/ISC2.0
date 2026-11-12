@@ -1,0 +1,91 @@
+{
+  "item_id": "dailydialog/train_623/A_to_B",
+  "stages": {
+    "E1_ledger": {
+      "count": 1,
+      "valid_spans": 1
+    },
+    "E2_mechanisms": {
+      "count": 2,
+      "valid_spans": 2
+    },
+    "targeted_completion": {
+      "count": 1,
+      "valid_spans": 1
+    }
+  },
+  "invalid": [],
+  "candidate_count": 4,
+  "decisions": [
+    {
+      "id": "c1",
+      "claim": "B has or mentioned some product/item that A is inquiring about",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "A's questions 'What brand' and 'What about the quality?' jointly presuppose B has introduced some product/item. This is the most complete formulation covering both evidence turns.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c2",
+      "claim": "B has mentioned or shown a product/device that has a brand",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c1",
+      "reason": "c2 ('product that has a brand') is a strict subset of c1 which already captures the same presupposition from 'What brand' plus the additional quality evidence. Entity, action, and arguments are equivalent but c1 is more complete.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c3",
+      "claim": "B is discussing a product whose quality is being inquired about",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c1",
+      "reason": "c3 ('product whose quality is being inquired about') is a strict subset of c1 which already captures the same presupposition from 'What about the quality?' plus the brand evidence. c1 is the more complete representative.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c4",
+      "claim": "B's product/item appears to be digital or related to digital technology, given A's opening comment about everything going digital immediately preceding brand and quality questions",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "reject",
+      "level": "E4",
+      "same_as": "",
+      "reason": "A's general observation 'everything is going digital nowadays' is a broad opinion, not a specific claim about B's product. Linking it to B's item via cross-turn inference is speculative; B could have mentioned any product (analog, non-digital) and A simply made a tangential remark before asking about brand.",
+      "counterexample": "B mentions a handcrafted wooden pen; A says 'everything is going digital nowadays' as a general lament, then asks 'What brand' about the pen.",
+      "action": "reject_unsupported"
+    }
+  ],
+  "review_second_opinion": {
+    "reviewed": 1,
+    "restored": 0
+  },
+  "final_claims": 1,
+  "generic_claims_kept": 0,
+  "api_task_ids": [
+    "05a649c8a7baf4dc7b0996d42ed8809ea9572340e510c17b53c8995230d5900b",
+    "c42d4244bc17ab09ee157d070e20318db0866a203ad40b0a5e625270aae8c600",
+    "e85e7df94acfb014f8e4aa5f4940c5f25deebe3c38b5008bdbcc76cc44400d74",
+    "6421563bc2774fb20c4e05c526e91f054f36a7e1968fedfa37bc865e14b0ad41",
+    "33fd49aaa99238ce383aaba2f8af70716d6aa56b20d9ae3d979f41b63692a792"
+  ],
+  "design": "relation-preserving E1/E2 + independent dispute review"
+}

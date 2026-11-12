@@ -1,0 +1,1 @@
+人工审核尚未完成，所有人工栏为空。先让两位审核者独立完成 blind_A_support.csv（只看 A、不得先读完整对话和 AI 标签），再独立完成 blind_truth.csv，最后才展示 annotations.csv 的 AI 暂定标签并裁决。盲表使用不含世界真假编码的不透明 review_id；review_key.json 为后续匹配键，不在首轮展示。自然真值仅为对话设定，不是现实人物核验；受控真值来自虚构世界。区分 truth、A 支持、持有者和证据充分性，unknown 不是 false。natural_reconstructions.json 是未经语义评分的自然重建文本，可另做断言审核。

@@ -1,0 +1,162 @@
+{
+  "item_id": "dailydialog/train_9199/A_to_B",
+  "stages": {
+    "E1_ledger": {
+      "count": 2,
+      "valid_spans": 2
+    },
+    "E2_mechanisms": {
+      "count": 5,
+      "valid_spans": 5
+    },
+    "targeted_completion": {
+      "count": 3,
+      "valid_spans": 3
+    }
+  },
+  "invalid": [],
+  "candidate_count": 9,
+  "decisions": [
+    {
+      "id": "c1",
+      "claim": "B is named Mrs. White",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "explicit",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "A directly addresses B as 'Mrs. White' in turns 1 and 7; explicit naming.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c2",
+      "claim": "Mr. Cooper is B's manager",
+      "sources": [
+        "E1",
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "Turn 3 states 'Mr. Cooper, your manager' where 'your' refers to B; explicit relational fact.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c3",
+      "claim": "B's name is Mrs. White",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c1",
+      "reason": "'B's name is Mrs. White' is equivalent to 'B is named Mrs. White' in c1; c1 has stronger E1 source.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c4",
+      "claim": "B works at a location where Mr. Cooper is the manager",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c2",
+      "reason": "'B works at a location where Mr. Cooper is the manager' is a weaker presuppositional projection of c2's explicit 'Mr. Cooper is B's manager.'",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c5",
+      "claim": "B did something helpful for A regarding seeing Mr. Cooper",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "causal",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "A's 'Thanks a lot' in turn 7 presupposes B did something helpful regarding the request to see Mr. Cooper; genuine E2 inference from gratitude.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c6",
+      "claim": "B is addressed with the title 'Mrs.'",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c1",
+      "reason": "'B is addressed with the title Mrs.' is a weaker projection of c1's full claim that B is named Mrs. White.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c7",
+      "claim": "B is female",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "'Mrs.' title presupposes female gender; this is a genuine E2 presupposition not captured by c1's name claim alone.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c8",
+      "claim": "B has the ability or role to facilitate A's meeting with Mr. Cooper",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "Second-review support: The question 'Can I see Mr. Cooper, your manager now?' presupposes that B (Mrs. White) has the role or ability to facilitate or grant access to Mr. Cooper. This is a standard pragmatic presupposition of such requests directed at a specific person—A would not ask B unless B had some capacity to arrange or permit the meeting. The presupposition is minimal and justified by the question structure itself.",
+      "counterexample": "If B were merely a bystander with no connection to Mr. Cooper's scheduling, the question would be pragmatically odd, supporting the presupposition.",
+      "action": "keep"
+    },
+    {
+      "id": "c9",
+      "claim": "B agreed or responded affirmatively to A's request about seeing Mr. Cooper",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "reject",
+      "level": "E3",
+      "same_as": "",
+      "reason": "'All right' in turn 5 is A's own utterance, not B's response; attributing agreement to B is an inferred response not supported by visible turns.",
+      "counterexample": "A's 'All right' could be self-acknowledgment or response to an unseen statement.",
+      "action": "reject_unsupported"
+    }
+  ],
+  "review_second_opinion": {
+    "reviewed": 2,
+    "restored": 1
+  },
+  "final_claims": 5,
+  "generic_claims_kept": 1,
+  "api_task_ids": [
+    "3f9a1a573638fb57da6f3a638cd35319983c5290bc2454b4839c39c47cfcc983",
+    "e20dd57811dce4e0b214c3bf7ab032f6c8008f8fe58f6d9a8d1c638246aaffdb",
+    "e4c7b9da5fa949d824fab0d56b1ea50d9016c6bccc5e6e1e41ca0e827265dae9",
+    "b028e061baab56436c06d8d37aef46f7816d2927e97904c4efeea711601a10a7",
+    "1c538f3beba583f21ca2390a0611ea465f607129c388cf1d9922092f20f9d151"
+  ],
+  "design": "relation-preserving E1/E2 + independent dispute review"
+}

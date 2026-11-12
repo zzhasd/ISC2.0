@@ -1,0 +1,103 @@
+{
+  "item_id": "dailydialog/train_7845/A_to_B",
+  "stages": {
+    "E1": {
+      "candidates": 2,
+      "valid_evidence": 2
+    },
+    "E2": {
+      "candidates": 3,
+      "valid_evidence": 3
+    },
+    "targeted_rescue": {
+      "candidates": 0,
+      "skipped": true
+    }
+  },
+  "invalid": [],
+  "candidate_count": 5,
+  "decisions": [
+    {
+      "candidate_id": "c1",
+      "claim": "B's surname is Thomas",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "explicit",
+      "confidence": 0.9,
+      "verdict": "keep",
+      "level": "E1",
+      "reason": "A directly addresses B as 'Mr. Thomas,' explicitly establishing B's surname as Thomas. This is a direct fact stated in the utterance.",
+      "counterexample": "",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c2",
+      "claim": "B hired a new driver",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "presupposition",
+      "confidence": 0.85,
+      "verdict": "keep",
+      "level": "E1",
+      "reason": "A's phrase 'that new driver you've hired' directly presupposes that B hired a new driver. The presupposition is explicit in the utterance structure.",
+      "counterexample": "",
+      "same_as": "",
+      "action": "retain"
+    },
+    {
+      "candidate_id": "c3",
+      "claim": "B's name/title is Mr. Thomas",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "confidence": 0.95,
+      "verdict": "duplicate",
+      "level": "E1",
+      "reason": "c3 ('B's name/title is Mr. Thomas') and c1 ('B's surname is Thomas') refer to the same fact from the same evidence 'Hello, Mr. Thomas.' They are bidirectionally equivalent at the same granularity.",
+      "counterexample": "",
+      "same_as": "c1",
+      "action": "remove_semantic_duplicate"
+    },
+    {
+      "candidate_id": "c4",
+      "claim": "B has hired a new driver",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "confidence": 0.92,
+      "verdict": "duplicate",
+      "level": "E1",
+      "reason": "c4 ('B has hired a new driver') and c2 ('B hired a new driver') refer to the same event from the same presupposition 'that new driver you've hired.' They are bidirectionally equivalent.",
+      "counterexample": "",
+      "same_as": "c2",
+      "action": "remove_semantic_duplicate"
+    },
+    {
+      "candidate_id": "c5",
+      "claim": "B is in a position where they hire drivers (likely in a work/organizational context)",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "causal",
+      "confidence": 0.8,
+      "verdict": "reject",
+      "level": "E3",
+      "reason": "While B hired a driver, this does not establish that B is 'in a position where they hire drivers' as a role, nor that it is a 'work/organizational context.' B could have hired a personal/family driver. The claim adds speculative inference beyond the presupposition.",
+      "counterexample": "B could reply: 'Yes, I hired a personal driver for my elderly mother's daily commute.' This is consistent with all A turns but contradicts the organizational/work context claim.",
+      "same_as": "",
+      "action": "reject_unsupported"
+    }
+  ],
+  "final_claims": 2,
+  "api_task_ids": [
+    "917812dc7332cfdeaf6818cf79efbd2330854c45356ba7268027abbcfd9522aa",
+    "4e109d8760103586414a4d324dc690e1c7d1e9c2f009d44cc72d3cc455541e8d",
+    "cb96f8ba1ca43eab67a39f4e1c04e734284e32a7a1d167b3e6f8d6a75abce711"
+  ],
+  "design": "dual route, targeted rescue, globally grouped evidence adjudication"
+}

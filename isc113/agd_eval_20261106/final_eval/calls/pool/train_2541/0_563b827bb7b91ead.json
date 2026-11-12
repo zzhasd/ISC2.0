@@ -1,0 +1,786 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Have you heard about Michael's new home ? It's in one of the poshest areas in this area ."
+        },
+        {
+          "turn_id": 3,
+          "text": "No , he's living in an old house in Warton ."
+        },
+        {
+          "turn_id": 5,
+          "text": "That's the one ."
+        },
+        {
+          "turn_id": 7,
+          "text": "He didn't buy it . His grandfather died recently and left him loads of money ."
+        },
+        {
+          "turn_id": 9,
+          "text": "No one in the family expected to get a dime from him . It was quite a surprise ."
+        },
+        {
+          "turn_id": 11,
+          "text": "He still has a complaint though ."
+        },
+        {
+          "turn_id": 13,
+          "text": "He wanted to live right on a bus line , but he doesn't . so , if he wants to take a bus anywhere , he has to walk 1/4 mile to get to a bus stop ."
+        },
+        {
+          "turn_id": 15,
+          "text": "You can say that again ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "Michael's grandfather left him loads of money",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "Michael does not live on a bus line",
+          "turn_ids": [
+            13
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "Michael's new home is in one of the poshest areas in this area",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B knows the location of Michael's house",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B identified a specific house that A confirmed was the correct one",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "Michael has to walk 1/4 mile to get to a bus stop",
+          "turn_ids": [
+            13
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "Michael has a new home",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B's assumption was specifically about Michael's living situation",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B expressed or acknowledged agreement with Michael's complaint about the bus stop distance",
+          "turn_ids": [
+            13,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B lives in or is geographically present in the same area as A",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B had some prior knowledge or assumption about Michael's living situation that A corrected",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B is aware of Michael's complaint about bus access",
+          "turn_ids": [
+            13,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B implied or suggested that Michael bought the house",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B asked or implied that Michael bought the house",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "Warton is one of the poshest areas in this area",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "Michael is living in an old house",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B implied that Michael's home is newly built or modern, which A corrected",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "The inheritance from Michael's grandfather was a surprise to the family",
+          "turn_ids": [
+            9
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "No one in the family expected to get any money from Michael's grandfather",
+          "turn_ids": [
+            9
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "Michael wanted to live right on a bus line",
+          "turn_ids": [
+            13
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B made a comment about the inconvenience of Michael's bus situation that A strongly agreed with",
+          "turn_ids": [
+            13,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B is familiar with the area or context being discussed",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B shares A's sentiment that Michael's bus access situation is inconvenient",
+          "turn_ids": [
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B agreed with A's assessment about Michael's complaint regarding bus access",
+          "turn_ids": [
+            13,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "Michael's house is in Warton",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "Michael's grandfather died recently",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B believed or stated that Michael bought the house",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B identified or confirmed a specific house or area that A agreed with",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "The hidden partner knows about Michael's living situation",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "The hidden partner is acquainted with Michael or his family",
+          "turn_ids": [
+            1,
+            5,
+            15
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "Michael has a new home that is an old house located in Warton, one of the poshest areas in this area.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "existence",
+            "value": "Michael has a new home",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "location_area",
+            "value": "one of the poshest areas in this area",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "location_name",
+            "value": "Warton",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "house_type",
+            "value": "old house",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s5",
+            "name": "area_status",
+            "value": "Warton is one of the poshest areas in this area",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s5"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "Michael's grandfather died recently and left him loads of money; no one in the family expected to get any money from him, and it was quite a surprise.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "event",
+            "value": "grandfather died recently",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "inheritance",
+            "value": "left Michael loads of money",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "family_expectation",
+            "value": "no one in the family expected to get any money",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "reaction",
+            "value": "quite a surprise",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s4"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "Michael wanted to live right on a bus line but does not; he has to walk 1/4 mile to get to a bus stop.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "current_state",
+            "value": "does not live on a bus line",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "desire",
+            "value": "wanted to live right on a bus line",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "consequence",
+            "value": "has to walk 1/4 mile to get to a bus stop",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B identified the specific location of Michael's house, which A confirmed as correct, demonstrating B's familiarity with the area and knowledge of Michael's living situation.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "knowledge",
+            "value": "B knows the location of Michael's house",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "identification",
+            "value": "B identified a specific house or area",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "confirmation",
+            "value": "A confirmed B's identification was correct",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "familiarity",
+            "value": "B is familiar with the area or context",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s5",
+            "name": "broader_knowledge",
+            "value": "B knows about Michael's living situation",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s5"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B had a prior assumption that Michael's home was newly built or modern, which A corrected by stating it is an old house.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "assumption_content",
+            "value": "B implied the home is newly built or modern",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "correction",
+            "value": "A corrected B's assumption",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "topic",
+            "value": "about Michael's living situation",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B assumed or asked whether Michael bought the house.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "assumption",
+            "value": "B implied, asked, or stated that Michael bought the house",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "B was aware of Michael's complaint about bus access and expressed agreement, sharing the sentiment that the situation is inconvenient.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "awareness",
+            "value": "B is aware of Michael's complaint about bus access",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "agreement",
+            "value": "B expressed or acknowledged agreement with the complaint",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "sentiment",
+            "value": "B shares the view that the bus situation is inconvenient",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f8",
+        "canonical_claim": "B is acquainted with Michael or his family.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "acquaintance",
+            "value": "B is acquainted with Michael or his family",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f9",
+        "canonical_claim": "B lives in or is geographically present in the same area as A.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "co_location",
+            "value": "B is in the same area as A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 9807,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7326,
+      "text_tokens": 9807
+    },
+    "prompt_tokens": 1936,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1936
+    },
+    "total_tokens": 11743
+  }
+}

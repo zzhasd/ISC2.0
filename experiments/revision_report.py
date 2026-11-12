@@ -1,0 +1,204 @@
+"""Render the completed revision report and static scientific figures from saved data."""
+import collections
+import json
+import math
+from pathlib import Path
+import numpy as np
+from revision_api import ROOT,OUT,read,save
+from revision_analyze import intervals,write_csv
+import stage2_analyze as s2
+
+def pct(x):return 'NA' if x is None else f'{x*100:.1f}%'
+def num(x):return 'NA' if x is None else f'{x:.2f}'
+def ci(x):return 'NA' if x is None else '['+', '.join(pct(v) for v in x)+']'
+
+def comparisons():
+    old=read(ROOT/'results/stage2/predictions.json');new=read(OUT/'stage2/predictions.json')
+    pooled=[{**r,'condition':c} for c,rs in [('a_only',old),('full',new)] for r in rs if r['condition']=='a_only']
+    cmp=s2.paired_bootstrap(pooled)
+    cmp['qwen38_minus_qwen_plus_recovery_rate']=cmp.pop('full_minus_A_recovery_rate')
+    s1old=[r for r in read(ROOT/'results/predictions.json') if r['dataset']=='dailydialog' and r['condition']=='a_only']
+    s1new={r['id']:r for r in read(OUT/'stage1/predictions.json') if r['dataset']=='dailydialog' and r['condition']=='a_only'}
+    true=[r for r in s1old if r['truth']=='true' and r['id'] in s1new]
+    delta=intervals([int(s1new[r['id']]['prediction']=='true')-int(r['prediction']=='true') for r in true],[r['group'] for r in true])
+    out={'stage2_same_A_only_sample':cmp,'stage1_positive_fact_recovery_delta':delta,
+        'interpretation':'Paired finite-sample model comparison; qwen-plus and qwen3.8-flash are rolling aliases, not two frozen weight snapshots.'}
+    save(OUT/'model_comparison.json',out)
+    return out
+
+def plot(s1,s2new,nat,ctrl,defense):
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    plt.rcParams.update({'font.family':'DejaVu Sans','font.size':10,'axes.spines.top':False,'axes.spines.right':False})
+    old1=read(ROOT/'results/summary.json');old2=read(ROOT/'results/stage2/summary.json')
+    fig,axs=plt.subplots(2,2,figsize=(12,8.2));blue='#2864a5';green='#15937d';orange='#d98e22';red='#bd4b54'
+    x=np.arange(2);w=.34;ax=axs[0,0]
+    values_old=[old1['natural_evidence']['a_only']['true_fact_disclosure']['rate'],old2['conditions']['all/a_only']['recovery_rate']]
+    values_new=[s1['natural_evidence']['a_only']['true_fact_disclosure']['rate'],s2new['conditions']['all/a_only']['recovery_rate']]
+    ax.bar(x-w/2,values_old,w,label='qwen-plus (historical)',color=blue)
+    ax.bar(x+w/2,values_new,w,label='qwen3.8-flash',color=green)
+    ax.set_xticks(x,['Stage 1 (25 true facts)','Stage 2 (26 true facts)']);ax.set_ylim(0,1)
+    ax.set_title('Same-input A-only rerun');ax.set_ylabel('True-fact recovery');ax.legend(fontsize=8)
+    ax=axs[0,1];cs=['a_only','narrative','shuffled','word_bag'];x=np.arange(4)
+    ax.bar(x-w/2,[ctrl['conditions'][c]['accuracy'] for c in cs],w,label='Declared label',color=blue)
+    ax.bar(x+w/2,[ctrl['conditions'][c]['forced_binary_accuracy_ties_false'] for c in cs],w,label='Forced binary',color=orange)
+    ax.set_xticks(x,['A only','Narrative','Shuffled','Words']);ax.set_ylim(0,1.08)
+    ax.set_title('240 constructed pairs / 20 surface templates');ax.set_ylabel('Attribute label recovery');ax.legend(fontsize=8)
+    ax=axs[1,0];x=np.arange(2)
+    for j,(c,color) in enumerate([('prior','#aaaeb4'),('a_only',blue),('full',green)]):
+        vals=[nat['conditions'][arm+'/'+c]['recovery_rate'] for arm in ['random','enriched']]
+        ax.bar(x+(j-1)*.24,vals,.23,label=c,color=color)
+    ax.set_xticks(x,['96 random dialogues','8 residual enriched']);ax.set_ylim(0,1.08)
+    ax.set_title('104 additional held-out dialogues');ax.set_ylabel('True-fact recovery');ax.legend(fontsize=8)
+    ax=axs[1,1]
+    names={'direct':'Direct','ordinary':'Reconstruct','private':'Private reconstruct','conservative':'Conservative'}
+    colors={'direct':blue,'ordinary':red,'private':green,'conservative':orange}
+    for m in names:
+        st=defense['methods'][m];xx=st['mean_retention'];yy=st['unsupported_definite']
+        if xx is not None:
+            ax.scatter(xx,yy,s=65,color=colors[m],zorder=3,label=names[m])
+    ax.set_xlim(0,4.2);ax.set_ylim(-.07,1.35);ax.set_yticks([0,1]);ax.set_xlabel('Model-rated nonsensitive retention (0–4)')
+    ax.set_ylabel('Unsupported B assertions\nin 64 views (AI reviewed)');ax.set_title('Privacy–utility proxy (64 views / method)')
+    ax.legend(loc='upper left',fontsize=8,frameon=False)
+    fig.suptitle('One-sided conversation privacy: Qwen3.8-Flash revision',fontsize=15,y=.99)
+    fig.text(.5,.005,'Exploratory: AI-provisional truth/support labels; fictional dialogue facts; same-model utility judge.',ha='center',fontsize=9,color='#555')
+    fig.tight_layout(rect=[0,.025,1,.97]);fig.savefig(OUT/'revision_results.png',dpi=180);fig.savefig(OUT/'revision_results.svg');plt.close(fig)
+
+def main():
+    audit=read(OUT/'audit.json');assert audit['all_plans_complete'],'Report requires completed request plans'
+    s1=read(OUT/'stage1/summary.json');s2new=read(OUT/'stage2/summary.json');nat=read(OUT/'natural/summary.json')
+    ctrl=read(OUT/'controlled_v2/summary.json');rep=read(OUT/'repeats/summary.json');de=read(OUT/'defense_reviewed/summary.json')
+    old1=read(ROOT/'results/summary.json');old2=read(ROOT/'results/stage2/summary.json');cmp=comparisons()
+    lines=['# Qwen3.8-Flash 重跑、扩样与审稿缺口推进报告','',
+    '日期：2026 年 10 月 31 日（Asia/Shanghai）。所有新增推理均实际调用百炼北京接口 `qwen3.8-flash`；关闭 thinking。既有 `qwen-plus` 原始数据、请求、结果和报告保持不变，哈希核验见 `audit.json`。','',
+    '**已完成：前两阶段及八个单样本探针重跑；新增 104 段自然对话；受控样本从 24 对扩至 240 对；补足重复实验；首次运行四条下游摘要流程并衡量隐私和效用。现有证据支持部分单侧属性可恢复，仍不能证明独立于普通语义的全新交互机制。**','',
+    '**全部自然真值和 A 侧支持仍是 AI 暂定标注，不是人工金标。对话中的事实不等于真实个人的经核验经历。摘要效用是同模型盲评代理，不是人工评价。**','',
+    '## 审稿意见对应的完成情况','',
+    '| 报告要求 | 既有情况 | 本轮推进与剩余缺口 |','| --- | --- | --- |',
+    '| 完整／单侧／空证据对照 | 两阶段先导 | 旧样本严格换模型重跑；新增 104 段、208 个目标视图；新增完整对照每次只评估一位目标 |',
+    '| 机制、词汇／主题控制 | 24 对、4 种模板 | 240 对、5 机制、12 词汇分配、4 表面形式；每对词及词频严格一致；自然度及语义等价人工验证仍缺失 |',
+    '| 宏 F1、AUPRC、对数损失、校准 | 第一阶段具备 | 重跑并在扩大的受控集报告；固定目录自然实验没有要求概率，因此不虚构其 AUPRC／log loss |',
+    '| 重复采样与置信区间 | 第二阶段原三次重复取消 | 原三次已补齐；再随机抽 24 个视图，各加 1 次 T=0、3 次 T=0.7；按对话聚类，受控比较加入模板／词汇聚类、符号置换和 Holm 校正 |',
+    '| 真实恢复、持有者误归因、无依据断言 | 有暂定分离 | 新增标签保留 truth / A-support / 原始证据话轮；unknown 不作 false，另做争议标签敏感性分析 |',
+    '| 下游放大与防御 | 尚未运行 | 64 个视图 × 4 流程 = 256 个摘要；保存重建、摘要、盲评和逐属性断言，展示 privacy–utility 代理结果 |',
+    '| 双人标注一致性与自然度 | 无 | 导出可直接审核的双人标注表、完整对话及 480 条受控文本；人工栏留空，未伪造完成 |',
+    '| 创新性检索、真实授权数据 | 尚未充分建立 | 本轮未完成逐篇相关工作核验、真实私人对话收集和授权；不声称首次发现或真实世界发生率 |','',
+    '## 1. 原实验重跑：只改模型','',
+    '62 个第一阶段请求、8 个单样本探针、100 个第二阶段计划请求全部执行成功。逐请求核验除 `model` 外 payload 完全相同，包括温度、提示、输入分组、输出上限和证据要求。原三次重复调用本轮均已执行。传输失败和同 payload 重试单独保留，不计作模型错误。','',
+    '| 同一批自然样本／条件 | 旧 qwen-plus | Qwen3.8-Flash |','| --- | ---: | ---: |']
+    for name,cond in [('第一阶段：仅 A','a_only'),('第一阶段：完整对话','full')]:
+        a=old1['natural_evidence'][cond]['true_fact_disclosure'];b=s1['natural_evidence'][cond]['true_fact_disclosure']
+        lines.append(f'| {name} | {a["assertions"]}/{a["n"]} ({pct(a["rate"])}) | {b["assertions"]}/{b["n"]} ({pct(b["rate"])}) |')
+    for name,cond in [('第二阶段：仅 A','a_only'),('第二阶段：完整对话','full')]:
+        a=old2['conditions']['all/'+cond];b=s2new['conditions']['all/'+cond]
+        lines.append(f'| {name} | {a["true_recoveries"]}/{a["gold_true"]} ({pct(a["recovery_rate"])}) | {b["true_recoveries"]}/{b["gold_true"]} ({pct(b["recovery_rate"])}) |')
+    d=cmp['stage2_same_A_only_sample'];a=s2new['conditions']['all/a_only']
+    lines += ['',f'第二阶段同样本恢复率差（新减旧）为 {pct(d["qwen38_minus_qwen_plus_recovery_rate"])}，对话聚类 bootstrap 95% 区间 {ci(d["ci95"])}。新模型 A-only 恢复 {a["true_recoveries"]} 项，其中 {a["a_supported_true_recoveries"]} 项有预标注 A 侧支持，{a["true_recoveries_without_prelabelled_A_support"]} 项缺少这一支持。后者不能自动算作可靠的证据恢复。',
+    '旧第二阶段完整对照缺失三个目标，新重跑完整对照返回齐全。因此表中完整对话比例是各自可用输出的描述，跨模型主比较使用两边齐全的 A-only 样本。第一阶段仍含 7 段规范化 train/test 重复，保留去重敏感性分析；新增样本全部排除了该类重复。第一阶段候选命题依据完整对话定向选取，存在候选选择侧信道，因此其恢复比例不能直接与第二阶段固定目录比例比较。',
+    '',f'第一阶段打乱话轮后的真属性恢复为 {s1["natural_evidence"]["shuffled"]["true_fact_disclosure"]["assertions"]}/25，仅 A 为 {s1["natural_evidence"]["a_only"]["true_fact_disclosure"]["assertions"]}/25。不能仅凭这些结果宣称稳定的顺序特异性效应。八个探针按原先选择原样重跑，但它们曾依据旧模型错误选择，不代表随机稳定性样本。','',
+    '## 2. 新增自然数据：104 段、208 个隐藏目标视图','',
+    '严格排除原两阶段样本、规范化 train/validation 重复及测试集内部重复后，剩余 775 段候选。先用固定种子抽取 96 段随机对话，再纳入剩余 8 段符合原富集规则的对话。原规则总共只剩 9 段匹配，其中一段已进入随机组；没有扩大或更改关键词去追求更多正例。','',
+    '新增 4,160 个目录检查项中 true 83、false 2、unknown 4,075。83 个真事实包括就业 69、健康 1、家庭 7、财务 1、关系 5；50 个正事实依赖已标记的职业／面试等政策。由本次 Codex 助手阅读全部 104 段对话后、攻击调用前固定，未利用攻击结果改标。证据支持和真值分开。目录保持 20 项，未事后加入枪械、国籍、政治观点等本批可见信息。','',
+    '| 抽样组 | 输入 | 可用视图 | 真属性数 | 恢复数 | 恢复率 | 对话聚类 95% CI |','| --- | --- | ---: | ---: | ---: | ---: | --- |']
+    for arm,name in [('random','随机 96 段'),('enriched','残余富集 8 段'),('all','人为组合的 104 段')]:
+        for cond in ['prior','a_only','full']:
+            s=nat['conditions'][arm+'/'+cond]
+            lines.append(f'| {name} | {cond} | {s["views"]} | {s["gold_true"]} | {s["true_recoveries"]} | {pct(s["recovery_rate"])} | {ci(s["recovery_cluster_bootstrap"]["ci95"])} |')
+    lines += ['', '两组分开解释；随机组也仅代表排除既有样本后的残余候选池，既有抽样已拿走不少敏感线索对话。混合比例不是总体或真实世界泄露率。分母是目录内已标定的真事实，不是某人全部隐私。全 unknown 的高准确率也不代表保护有效。','',
+    '| 新增自然数据，仅 A | 随机组 | 富集组 | 合计 |','| --- | ---: | ---: | ---: |']
+    for label,key in [('有 A 支持的真恢复','a_supported_true_recoveries'),('缺少预标 A 支持的真恢复','true_recoveries_without_prelabelled_A_support'),('未知真值上的肯定','positive_assertions_unverified_truth'),('未知真值上的否定','false_assertions_on_unknown_truth'),('已知事实上的错误肯定／否定','definite_wrong_on_known_truth')]:
+        lines.append('| '+label+' | '+' | '.join(str(nat['conditions'][arm+'/a_only'][key]) for arm in ['random','enriched','all'])+' |')
+    st=nat['strict_sensitivity']['all/a_only']
+    lines += ['',f'保守分析剔除职业服务角色、面试语境、预设和其他事前标记的政策敏感项后，A-only 恢复 {st["true_recoveries"]}/{st["gold_true"]} ({pct(st["recovery_rate"])}；完整分组及逐属性结果在 `natural/summary.json`。',
+    '样本虽然扩大，但健康／财务等正事实仍稀疏，明确自然否定仅 2 项，不能可靠估计一般假阳性率。职业服务角色依赖标注政策，A 支持的严格程度也有争议。未确认断言应交人工复核，不应直接写成已证实的幻觉。去除精确重复不等于排除近重复或预训练污染。','',
+    '## 3. 机制诊断：从 24 对扩大至 240 对','',
+    '5 个机制（确认、指代、修正、跨话轮绑定、所有格预设）× 12 组词汇／属性分配 × 4 种预设表面形式，共 240 对、480 条样本、1,920 个条件预测。每对持有者相反，A 侧词及词频严格相同；无序词袋输入逐字相同。叙述对照明确保留持有者和极性，叙述对内部也保持相同词频。正反成员和不同条件不放入同一请求。','',
+    '**本节采用 `controlled_v2/` 的完整重跑。** 首版 `controlled/` 在错误复查中发现确认句存在“No, swap...”的言语行为歧义及“you has”等语法错误，因此其确认机制不能按清洁金标解释。修正版仅更换确认模板，使用“对保留原分配回答 yes、对反转回答 no”等明确表述，其他机制、词汇、真值、批次和条件保持不变；重新执行全部 320 个请求。首版的全部请求、返回和分析保留，修正版属于事后发现构造缺陷后的探索性修正，不能当作独立的预注册验证。两版不合并计算样本量。','',
+    '| 输入 | 有效项目 | 声明标签准确率 | 强制二分类准确率 | 两成员都正确的配对率 | Macro-F1 | AUPRC | Log loss | Brier | ECE |','| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
+    for cond in ['a_only','narrative','shuffled','word_bag']:
+        s=ctrl['conditions'][cond]
+        lines.append(f'| {cond} | {s["n"]} | {pct(s["accuracy"])} | {pct(s["forced_binary_accuracy_ties_false"])} | {pct(s["both_pair_members_correct"])} | {num(s["macro_f1_present_gold_classes"])} | {num(s["positive_auprc_truth_known_only"])} | {num(s["log_loss_nats"])} | {num(s["brier_multiclass"])} | {num(s["ece_10_bins"])} |')
+    lines += ['', '无序词袋上的 unknown 是合理弃答；其三类真值恢复分数低，不能解读成模型推理能力差。强制二分类依据 p_true 与 p_false 比较、平局取 false，展示没有足够证据时的辨别基线。概率是模型自报的三类证据分数，非 token logprobs；校准和对数评分只在这个测量约定下成立，不能换算成真实条件互信息。对数评分将零概率截断至 1e-6 后归一化；极端分数差依赖这一人为阈值，其他概率评分使用原始有效分布。','',
+    '| 配对比较（仅 A 减对照） | 准确率差 | 模板聚类 95% CI | 符号置换 p | Holm p |','| --- | ---: | --- | ---: | ---: |']
+    for name,s in ctrl['comparisons'].items():
+        v=s['accuracy_delta_template_cluster']
+        lines.append(f'| {name} | {pct(v["estimate"])} | {ci(v["ci95"])} | {s["paired_template_signflip_p"]:.4f} | {s["holm_adjusted_p"]:.4f} |')
+    lines += ['', '重采样还分别按 240 个配对、20 个机制×表面模板、12 组词汇及 5 个机制报告准确率区间。不能把 480 条模板实例当作 480 个独立自然场景。置换检验只有 20 个手工模板簇，属于条件性探索。','',
+    '| 机制 | 仅 A 准确率 | 叙述准确率 | 打乱准确率 |','| --- | ---: | ---: | ---: |']
+    for m,vals in ctrl['mechanisms'].items():lines.append(f'| {m} | {pct(vals["a_only"]["accuracy"])} | {pct(vals["narrative"]["accuracy"])} | {pct(vals["shuffled"]["accuracy"])} |')
+    base=ctrl['exploratory_supervised_baselines']
+    lines += ['',f'探索性非 LLM 基线：unigram 按词汇组留一准确率 {pct(base["unigram/leave_lexical_assignment_out"]["accuracy"])}；unigram+bigram 为 {pct(base["unigram_bigram/leave_lexical_assignment_out"]["accuracy"])}，按整类机制留一为 {pct(base["unigram_bigram/leave_mechanism_out"]["accuracy"])}。这些基线只在新增构造集内部训练，不能与无任务训练的 LLM 公平比较成本，也不证明新机制。',
+    '规模扩大和词频控制解决了原实验的一部分脆弱性，但仍未做到 A-only 与叙述之间严格等长、逐命题语义等价且自然度相同。打乱可能改变语义，手工的排他属性设定也不同于真实生活。因而不能把正向消融结果单独解释为交互形式的因果贡献。','',
+    '## 4. 重复性：补齐旧重复，再新增 96 次调用','',
+    f'原第二阶段三个精确重复视图的 60 个标签变化数为 {s2new["exact_repeats"]["changed_labels"]}。另用固定种子从 64 个视图随机抽 24 个，每个加一次 T=0 和三次 T=0.7。未按错误或阳性选择。','',
+    '| 设置 | 有效视图 | 视图×重复 | 比较决策 | 相对主调用变化数 | 至少一项变化的视图×重复 |','| --- | ---: | ---: | ---: | ---: | ---: |']
+    for name,s in rep['conditions'].items():lines.append(f'| {name} | {s["views"]} | {s["view_trials"]} | {s["compared_decisions"]} | {s["changed_decisions_from_t0_main"]} | {s["view_trials_with_any_change"]} |')
+    lines += ['', 'T=0.7 与 T=0 主调用的差异包含采样温度变化；T=0.7 三次之间的分歧另存于 summary.json。许多项目真值为 unknown，因此低标签变化不等于所有敏感正事实都稳定。重复不是新增独立对话，不扩大有效样本量。','',
+    '## 5. 下游放大与 privacy–utility 代理实验','',
+    '在原第二阶段全部 64 个 A-only 视图上比较 direct、ordinary reconstruction→summary、privacy-constrained reconstruction→summary 和 conservative evidence-only summary。共 128 次重建、256 次摘要、256 次摘要盲评。生成只见 A；盲评只见 A、摘要和固定目录，不见真实 B、gold 或方法名。utility 是 Qwen3.8-Flash 对非敏感可见目标／安排／行动保留及一致性的 0–4 评分。','',
+    '**本节采用 `defense_reviewed/` 的 AI 候选复核结果。** 首轮 256 次评分经错误检查发现系统性 A/B 持有者误归因，例如把“A 请求失业支票”当作隐藏 B 失业，故首轮隐私计数不作有效结论。冻结更明确的持有者说明、正反例和 holder 字段后，对全部相同摘要另做 256 次盲评，原判保存在 `defense_judge_v2/`。Codex 再逐项检查 v2 的全部 63 个明确断言候选，剔除归属不清、把背景推断当成明确否定等不符合定义的候选，并在需要时将省略号摘录换成摘要中实际存在的连续原文；原 quote、每项决定和理由均保留于 `defense_judge_v2/assertion_review.json`。AI 复核不改变摘要或源 gold，亦不是独立人工金标；未估计模型漏抽取率，计数仅代表当前筛选定义下可见的候选。','',
+    '“新增真实披露”=摘要明确断言 gold 为 true、而预标 A 侧支持不足的属性；“无依据断言”=摘要明确肯定或否定预标 A 侧 unknown 的属性。它是支持风险代理，不能统称经核验幻觉。“已知事实错误”只计算与已知 true/false 相冲突的断言。主要计数要求断言附带的原文 quote 能在摘要中精确找到。','',
+    '| 流程 | 有效视图 | 真属性明确披露 | 新增真实披露 | 无依据断言 | 已知事实错误 | 未确认肯定 | 非敏感保留 /4 | 一致性 /4 |','| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
+    for m,s in de['methods'].items():
+        lines.append(f'| {m} | {s["views"]} | {s["true_disclosures"]} | {s["new_true_disclosures"]} | {s["unsupported_definite"]} | {s["known_truth_errors"]} | {s["unverified_positive"]} | {num(s["mean_retention"])} (n={s["retention_n"]}) | {num(s["mean_consistency"])} |')
+    lines += ['', '| 剔除争议标签的敏感性分析 | 真属性披露 | 新增真实披露 | 无依据断言 |','| --- | ---: | ---: | ---: |']
+    for m,s in de['methods'].items():
+        lines.append(f'| {m} | {s["strict_true_disclosures"]} | {s["strict_new_true_disclosures"]} | {s["strict_unsupported_definite"]} |')
+    lines += ['', f'AI 断言复核剔除 {sum(s["rejected_by_AI_assertion_review"] for s in de["methods"].values())} 个候选；其原判均保留。复核后 quote 精确匹配失败共 {sum(s["quote_validation_failures"] for s in de["methods"].values())} 项，保留于 `defense_reviewed/quote_validation_failures.json`；这些断言不进入主要披露计数，不能据此声称风险为零。']
+    lines += ['', '每个方法最多 64×20=1,280 个检查项；同一对话的两视图与全部属性相关。评分未覆盖目录外的敏感泄露，不能解释成完整隐私保护。','',
+    '| 配对比较 | 无依据断言数差／视图 | 95% CI | 非敏感保留分数差 | 95% CI |','| --- | ---: | --- | ---: | --- |']
+    for name,s in de['paired_comparisons'].items():
+        r=s['unsupported_definite_delta_per_view'];u=s['retention_delta_per_view']
+        rci='NA' if r is None else '['+', '.join(num(v) for v in r['ci95'])+']'
+        uci='NA' if u is None else '['+', '.join(num(v) for v in u['ci95'])+']'
+        lines.append(f'| {name} | {num(r["estimate"] if r else None)} | {rci} | {num(u["estimate"] if u else None)} | {uci} |')
+    risk=de['paired_comparisons']['private_minus_ordinary']['unsupported_definite_delta_per_view']
+    if risk and risk['ci95'][0]<=0<=risk['ci95'][1]:
+        lines += ['', '**隐私约束重建相对普通重建的无依据断言数差区间包含零，本轮没有得到稳定的防御优势。** 不应只看点估计下降就宣布防御有效。']
+    lines += ['', '以上差异按原始对话聚类 bootstrap，不以 1,280 个属性项独立重采样。同模型评分可能偏好自己的表达，亦可能漏标摘要中的断言；接近满分的评分还存在分辨率不足。保留缺失评分、精确 quote 校验失败和逐条文本；尚需人工复核与外部评审模型。防御只能约束后续输出，不能删除攻击者已经读到的 A 原话。','',
+    '## 6. 调用完整性、异常与复现','',
+    f'累计记录 {audit["recorded_attempts_including_probe"]} 次调用尝试（含一次 29-token 连通探针），已记录 {audit["recorded_tokens_including_probe"]:,} tokens。出现 {len(audit["transport_or_http_failures"])} 条网络／HTTP 失败记录；重试保留原请求及独立 attempt_id，不以新结果覆盖原失败。失败或未返回的服务端工作实际计费未知；本地 token 总量不是账单。没有自动模型降级，也未把失败输出填成 unknown。','',
+    '| 计划 | 计划任务 | 实际记录尝试 | 成功任务 | 未完成任务 |','| --- | ---: | ---: | ---: | ---: |']
+    for name,s in audit['requests'].items():lines.append(f'| {name} | {s["planned"]} | {s["recorded_attempts"]} | {s["successful"]} | {s["missing_tasks"]} |')
+    lines += ['', '响应解析缺失应与网络失败分开查看：`stage1/validation_errors.json`、`stage2/validation_errors.json`、`controlled/validation_errors.json`、`controlled_v2/validation_errors.json`、`natural/validation_errors.json`、`defense_judge/validation_errors.json` 和 `defense_judge_v2/validation_errors.json`。原始返回、finish_reason、模型名、时间、tokens、请求哈希和重试审计均保留。HTTP 200 但 JSON/结构无效或截断不算有效预测。',
+    '密钥仅通过进程 stdin／内存传入，未写入代码、公开请求或结果。程序为计划加了操作系统文件锁；一次多余恢复启动被未返回请求保护机制拦截，没有新增 API 调用。具体情况和全部 TLS 恢复见 `DEVIATIONS.md`。',
+    '', '无 API 的分析复算：','', '```powershell',
+    'python experiments/revision_analyze.py legacy controlled controlled_v2 natural repeats defense defense_v2',
+    'python experiments/revision_review_assertions.py',
+    'python experiments/revision_analyze.py defense_reviewed',
+    'python experiments/revision_audit.py',
+    'python experiments/revision_report.py','```','',
+    '需要另一次付费重跑时应复制本轮冻结计划到新的目录并通过 `DASHSCOPE_API_KEY` 提供密钥；同目录恢复会跳过已成功任务，不会重新计算。生成阶段有依赖：先重建，再生成摘要计划，再生成评分计划。详见 `REVISION_PROTOCOL.md` 和脚本。','',
+    '## 7. 对论文主张的影响与未完成实验','',
+    '当前可支持：在固定目录、完全移除 B 的输入、且区分真值与可见支持的条件下，单侧对话存在可被模型利用的属性线索；此现象在换用 Qwen3.8-Flash 后仍出现。受控实验表明模型能利用持有者关系和组合信息，但叙述对照同样可承载这些信息。应以风险测量和细粒度错误分析为主，不声称证明超出普通语义的新机制。','',
+    '仍未完成且不能由扩大 API 调用替代的项目：两名独立人类标注员及一致性／仲裁；自然度和语义等价盲评；自然数据明确否定和低频属性的充分样本；独立来源模型／人工摘要质量评价；严格控制长度与可观察语义的机制因果实验；真实授权私人对话；完整创新性文献检索。已将可复核样本与空白人工栏保存至 `human_review/`。','',
+    '## 文件入口','',
+    '- `audit.json`：覆盖、调用与边界检查；`model_comparison.json`：同样本模型差异及区间。',
+    '- `stage1/`、`singletons/`、`stage2/`：旧实验的新模型重跑。',
+    '- `natural/`、`controlled/`、`controlled_v2/`、`repeats/`：扩样与稳定性；逐条预测、汇总和原始请求／返回。',
+    '- `defense_reconstruction/`、`defense_summary/`、`defense_judge/`、`defense_judge_v2/`：重建、摘要及两版评分；首轮有已知持有者错误。',
+    '- `defense_reviewed/`：AI 候选复核后的主表；原始自动评分留在 `defense_judge_v2/`。',
+    '- `human_review/`：新增自然标注表、全对话和受控质量表；人工摘要复核使用 `summary_review_blind.csv`。',
+    '- `../../data/revision/`：新增冻结数据与标签；`../../REVISION_PROTOCOL.md`：执行前设计及明确补充。','',
+    '模型及接口依据：[Qwen3.8-Flash 官方说明](https://help.aliyun.com/en/model-studio/qwen3-8-flash)、[百炼北京接入域名](https://help.aliyun.com/zh/model-studio/beijing-access-information)。实际可用性以本轮成功返回的 model 字段为证。数据沿用 [DailyDialog 原论文](https://aclanthology.org/I17-1099/)及项目原始附件；派生片段继续保留原来源、非商业、署名及相同方式共享限制。','',
+    '![重跑、扩样和下游效用结果]('+str((OUT/'revision_results.png').as_posix())+')','']
+    (OUT/'实验报告.md').write_text('\n'.join(lines),encoding='utf-8')
+    plot(s1,s2new,nat,ctrl,de)
+    # Human ratings remain empty; model ratings are kept in a different table.
+    vr=read(OUT/'defense_reviewed/view_results.json')
+    review=[{k:r[k] for k in ['dialogue_id','view_id','method','summary']}|{
+        'human1_unsupported_attributes':'','human2_unsupported_attributes':'','human1_utility':'','human2_utility':'','adjudication':''} for r in vr]
+    if not (OUT/'human_review/summary_review.csv').exists():write_csv(OUT/'human_review/summary_review.csv',review)
+    import hashlib
+    sources={(t['dialogue_id'],t['target_source_speaker']):json.loads(t['payload']['messages'][1]['content'])['transcript'] for t in read(OUT/'stage2/requests.json') if t['condition']=='a_only'}
+    blinded=[]
+    for r in vr:
+        hidden=int(r['view_id'][-1])
+        blinded.append({'id':hashlib.sha256((r['view_id']+'|'+r['method']).encode()).hexdigest()[:12],
+            'visible_A':sources[(r['dialogue_id'],hidden)],'summary':r['summary'],
+            'human1_B_assertions':'','human2_B_assertions':'','human1_retention':'','human2_retention':'','human1_consistency':'','human2_consistency':'','adjudication':''})
+    if not (OUT/'human_review/summary_review_blind.csv').exists():write_csv(OUT/'human_review/summary_review_blind.csv',blinded)
+    print(json.dumps({'report':str(OUT/'实验报告.md'),'complete':True}))
+
+if __name__=='__main__':main()

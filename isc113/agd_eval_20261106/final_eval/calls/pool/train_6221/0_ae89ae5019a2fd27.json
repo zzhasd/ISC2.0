@@ -1,0 +1,817 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Do you like the apartment so far ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "What ’ s the problem ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "That ’ s no big deal ."
+        },
+        {
+          "turn_id": 7,
+          "text": "What do you want me to do about it ?"
+        },
+        {
+          "turn_id": 9,
+          "text": "I won ’ t be able to do that right now ."
+        },
+        {
+          "turn_id": 11,
+          "text": "Fine , I ’ ll have it fixed for you ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B is living in or residing in an apartment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B wants A to take action about the problem",
+          "turn_ids": [
+            7,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is in or has an apartment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B wants something (likely in or related to the apartment) to be fixed or repaired.",
+          "turn_ids": [
+            7,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "Something belonging to or affecting B is broken and needs fixing",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B is not the one responsible for apartment maintenance/repairs",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B wants something done about their problem",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B is currently living in or staying in an apartment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "A has the ability or authority to arrange repairs for B's apartment",
+          "turn_ids": [
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B has indicated that there is a problem",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B is currently living in or staying at an apartment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "Something in B's apartment needs to be repaired or fixed",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B asked or expected A to take some action regarding the apartment problem",
+          "turn_ids": [
+            7,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B is staying in or living in an apartment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B expects A to arrange repairs rather than performing them personally",
+          "turn_ids": [
+            7,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B has a problem",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B's problem involves something that needs to be fixed or repaired",
+          "turn_ids": [
+            3,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B has a problem",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B is living in or staying in an apartment and has been there for some time, though relatively recently.",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B wants A to do something about the problem",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B raised a concern about the apartment that A dismissed as not significant",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B has something broken that needs fixing",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B is currently in or at an apartment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B's requested action was something A could not perform immediately",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B raised a problem or complaint that A initially considered minor.",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B has been in the apartment for some period of time",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B has a problem with something in the apartment",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B lives in or is staying in an apartment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B's apartment has something that requires repair or fixing",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B has something that needs fixing",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "B has expressed a desire for A to take action about the problem",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "B recently began staying at the apartment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0032",
+          "claim": "B's problem is something that can be fixed",
+          "turn_ids": [
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0033",
+          "claim": "B reported or indicated a problem with the apartment",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0034",
+          "claim": "B has requested A to take action about the problem",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0035",
+          "claim": "B is residing in or staying at an apartment",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0036",
+          "claim": "B has been in the apartment for some duration",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0037",
+          "claim": "A has maintenance or repair responsibility over B's apartment",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0038",
+          "claim": "B has a problem with the apartment",
+          "turn_ids": [
+            1,
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0039",
+          "claim": "B has been in the apartment for some period of time prior to this conversation",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0040",
+          "claim": "B requested A to take action about the apartment problem",
+          "turn_ids": [
+            7,
+            9,
+            11
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B is currently living in or staying at an apartment and has been there for some period of time, relatively recently.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "residence",
+            "value": "B resides in / stays at an apartment",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "duration",
+            "value": "recently began; has been there for some period of time",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0035",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0036",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0039",
+            "slot_ids": [
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B raised a problem with the apartment that A initially dismissed as not a big deal / considered minor.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "problem_existence",
+            "value": "B has / indicated a problem with the apartment",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "A_initial_reaction",
+            "value": "A initially considered it minor / not a big deal",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0033",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0038",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "Something in B's apartment is broken and needs to be repaired or fixed, and it is fixable.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "repair_need",
+            "value": "something in B's apartment needs to be fixed / repaired",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "state_broken",
+            "value": "the item is broken",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "fixability",
+            "value": "the problem is something that can be fixed",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0032",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B requested or expects A to take action to arrange repairs for the apartment problem rather than performing them personally.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action_request",
+            "value": "B wants / requests / expects A to take action",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "action_target",
+            "value": "about the apartment problem",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "action_manner",
+            "value": "arrange repairs rather than perform them personally",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0034",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0040",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "A has the authority or responsibility for maintenance and repairs of B's apartment; B is not the one responsible.",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "A_responsibility",
+            "value": "A has maintenance / repair responsibility or authority over B's apartment",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "B_not_responsible",
+            "value": "B is not the one responsible for apartment maintenance / repairs",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0037",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "A could not perform B's requested action immediately / right now.",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "immediate_inability",
+            "value": "A was unable to carry out the requested action right away",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 8083,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6102,
+      "text_tokens": 8083
+    },
+    "prompt_tokens": 2274,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 2274
+    },
+    "total_tokens": 10357
+  }
+}

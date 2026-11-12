@@ -1,0 +1,50 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是独立的 A-only 信息发现审核员。只能看 A 发言，不看任何算法预测或旧金标准。尽可能全面但保守地发现由 A 直接明示(E1)或强隐式支持(E2)的、与 B 有关的可验证属性。逐轮扫描并整合跨轮证据。不要把开放疑问当事实；不要从服务业常识过度推断具体职业；不要把 A 的行为写成 B 的行为；不要生成仅仅属于场景的空洞陈述。保留时间、数量、否定和事件状态。多个独立关系分开，同一关系的限定条件在同一命题。输出 JSON {\"claims\":[{\"claim\":\"B ...\",\"turn_ids\":[1],\"proposed_level\":\"E1|E2\",\"mechanism\":\"explicit|presupposition|cross_turn|coreference|speech_act|event_state\"}]}。没有有效事实就空数组。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Diana's Flowers , Diana Lin's office , may I help you ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "No , she's out for lunch . May I take a message ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "Ok , I'll make sure she gets the message ."
+        }
+      ]
+    },
+    "max_tokens": 16000,
+    "temperature": 0,
+    "thinking_budget": 4096
+  },
+  "output": {
+    "claims": [
+      {
+        "claim": "B left a message for Diana Lin",
+        "turn_ids": [
+          5
+        ],
+        "proposed_level": "E2",
+        "mechanism": "speech_act"
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 474,
+    "completion_tokens_details": {
+      "reasoning_tokens": 439,
+      "text_tokens": 474
+    },
+    "prompt_tokens": 300,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 300
+    },
+    "total_tokens": 774
+  }
+}

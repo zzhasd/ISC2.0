@@ -1,0 +1,133 @@
+{
+  "item_id": "dailydialog/train_10808/A_to_B",
+  "stages": {
+    "E1_ledger": {
+      "count": 2,
+      "valid_spans": 2
+    },
+    "E2_mechanisms": {
+      "count": 3,
+      "valid_spans": 3
+    },
+    "targeted_completion": {
+      "count": 2,
+      "valid_spans": 2
+    }
+  },
+  "invalid": [],
+  "candidate_count": 7,
+  "decisions": [
+    {
+      "id": "c1",
+      "claim": "B is a driver",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "explicit",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "A directly addresses B as 'driver' in turn 1, which is an explicit vocative establishing B's role as a driver.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c2",
+      "claim": "B is driving a bus",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "cross_turn",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "A says 'this bus' and addresses B as 'driver' in the same turn, explicitly establishing B is driving a bus.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c3",
+      "claim": "B is a bus driver",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E1",
+      "same_as": "c2",
+      "reason": "'B is a bus driver' is the role equivalent of 'B is driving a bus' (c2), derived from the same evidence ('driver' + 'this bus'). c2 is the more complete action-level representative.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c4",
+      "claim": "B provided an answer or service to A between turns 3 and 5",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "A says 'Thank you' in turn 5, presupposing B provided an answer or service between turns 3 and 5 (likely about ride duration or fare).",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c5",
+      "claim": "B is operating the bus on a route that may pass a museum stop",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "A asks B to 'let me know when we get to the stop' in turn 7, presupposing B is operating the bus and can announce stops. The route may pass a museum stop (implied by turn 1's question).",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c6",
+      "claim": "B confirmed that the bus goes to the museum",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "reject",
+      "level": "E4",
+      "same_as": "",
+      "reason": "A's question 'How long is the ride?' does not confirm that the bus goes to the museum. A may still be uncertain; the question only presupposes a ride exists, not that the destination is confirmed. No evidence B confirmed the museum route.",
+      "counterexample": "A might be asking about ride duration regardless of whether B confirmed the museum is on the route.",
+      "action": "reject_unsupported"
+    },
+    {
+      "id": "c7",
+      "claim": "B provided an answer about the ride duration between turns 3 and 5",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "A says 'Thank you' in turn 5 after asking 'How long is the ride?' in turn 3, presupposing B answered the duration question between those turns.",
+      "counterexample": "",
+      "action": "keep"
+    }
+  ],
+  "review_second_opinion": {
+    "reviewed": 1,
+    "restored": 0
+  },
+  "final_claims": 5,
+  "generic_claims_kept": 1,
+  "api_task_ids": [
+    "232e2a3bb0b362529d2f91f901dd872479d212cc28dfb182e1a708d5d7b8444f",
+    "1fbfd14934a5e4475a9ce6c13319c86defb3b1886ab8365940d4b4d68246b68f",
+    "aa3ec6bc122489d7933dde0cef931d1ac8c8a501904544f1956f09cbfb000dbe",
+    "bd4c663b14fbb71cd26489b5f4eb0f9a6c8d9542e9ee418c30648c2aae5a39e1",
+    "0b96bd5c26cf202a0eec7ad07fa2d7c173dc6d9a91409753595a3b0f3f5d5183"
+  ],
+  "design": "relation-preserving E1/E2 + independent dispute review"
+}

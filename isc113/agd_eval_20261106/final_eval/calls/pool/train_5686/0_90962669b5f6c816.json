@@ -1,0 +1,1153 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Come in , please ."
+        },
+        {
+          "turn_id": 3,
+          "text": "Good afternoon . Have a seat , please . You are Mr . Sun ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "I have read your resume . I know you have worked for 3 years . Why did you choose to major in mechanical engineering ?"
+        },
+        {
+          "turn_id": 7,
+          "text": "What are you primarily interested in about mechanical engineering ?"
+        },
+        {
+          "turn_id": 9,
+          "text": "Why did you decide to apply for this position ?"
+        },
+        {
+          "turn_id": 11,
+          "text": "What do you think determines an employee's progress in a company such as ours ?"
+        },
+        {
+          "turn_id": 13,
+          "text": "We have several applicants for this position . Why do you think you are the person we should choose ?"
+        },
+        {
+          "turn_id": 15,
+          "text": "That sounds very good . How do you see your career development ?"
+        },
+        {
+          "turn_id": 17,
+          "text": "Have you anything to ask about the job ?"
+        },
+        {
+          "turn_id": 19,
+          "text": "Yes . If you undertake additional courses , provided these are approved , and you complete them successfully , you can claim back part , quite a large part , 75 % of the costs you incurred . Not just the fees , - traveling and other expenses too ."
+        },
+        {
+          "turn_id": 21,
+          "text": "Anything else ?"
+        },
+        {
+          "turn_id": 23,
+          "text": "Well , thank you very much , Mr . Sun . I'll let you know the result of the interview as soon as possible . Goodbye ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "The target is primarily interested in some aspect of mechanical engineering",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B is currently in a job interview",
+          "turn_ids": [
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is Mr. Sun",
+          "turn_ids": [
+            3,
+            23
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B is an interviewee.",
+          "turn_ids": [
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "The hidden partner is one of multiple applicants competing for the same position",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "The hidden partner's name is Mr. Sun",
+          "turn_ids": [
+            3,
+            23
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B applied for a position at the company A represents",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B has a resume that A read",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B is interested in mechanical engineering.",
+          "turn_ids": [
+            5,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "The target has a resume",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B is one of several applicants for this position",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B participated in an interview",
+          "turn_ids": [
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B asked whether the company supports or reimburses costs for additional courses",
+          "turn_ids": [
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "The hidden partner applied for a position",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B chose to major in mechanical engineering",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B decided to apply for this position.",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "The target majored in mechanical engineering",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "The target applied for a position at the company",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B applied for a position at A's company",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B has worked for 3 years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B participated in the interview in the afternoon",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B asked about the job during the interview",
+          "turn_ids": [
+            19,
+            21
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B applied for the position being interviewed for",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B is addressed as Mr. Sun.",
+          "turn_ids": [
+            3,
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B is a job applicant in an interview setting.",
+          "turn_ids": [
+            13,
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B majored in mechanical engineering.",
+          "turn_ids": [
+            5,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B gave an answer that A found positive before the career development question",
+          "turn_ids": [
+            15
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B asked at least one question about the job during the interview",
+          "turn_ids": [
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "B is named Mr. Sun",
+          "turn_ids": [
+            3,
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B is attending a job interview at A's company.",
+          "turn_ids": [
+            11,
+            23
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "B asked about additional courses or reimbursement during the interview",
+          "turn_ids": [
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "B is one of several applicants for the position",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0032",
+          "claim": "B participated in a job interview in the afternoon.",
+          "turn_ids": [
+            3,
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0033",
+          "claim": "B is participating in a job interview.",
+          "turn_ids": [
+            13,
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0034",
+          "claim": "The target has worked for 3 years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0035",
+          "claim": "B gave an answer that A considered very good",
+          "turn_ids": [
+            15
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0036",
+          "claim": "B majored in mechanical engineering",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0037",
+          "claim": "B's name is Mr. Sun.",
+          "turn_ids": [
+            3,
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0038",
+          "claim": "The hidden partner has worked for 3 years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0039",
+          "claim": "B's surname is Sun",
+          "turn_ids": [
+            3,
+            23
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0040",
+          "claim": "B majored in mechanical engineering.",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0041",
+          "claim": "The hidden partner has approximately 3 years of work experience",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0042",
+          "claim": "B has a resume that was read by A",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0043",
+          "claim": "B asked about claiming back costs for additional courses",
+          "turn_ids": [
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0044",
+          "claim": "B has a resume",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0045",
+          "claim": "B applied for a position",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0046",
+          "claim": "B is interested in undertaking additional courses as part of professional development, specifically regarding cost reimbursement.",
+          "turn_ids": [
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0047",
+          "claim": "B majored in mechanical engineering",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0048",
+          "claim": "B has worked for 3 years",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0049",
+          "claim": "B asked A a question about the job during the interview",
+          "turn_ids": [
+            17,
+            19
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0050",
+          "claim": "B has three years of work experience.",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0051",
+          "claim": "B is one of several applicants for the position",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0052",
+          "claim": "B has applied for a position at A's company",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B's name is Mr. Sun (surname Sun)",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "name",
+            "value": "Mr. Sun",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "surname",
+            "value": "Sun",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0037",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0039",
+            "slot_ids": [
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B is participating in a job interview as an interviewee/applicant at A's company in the afternoon",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "event",
+            "value": "job interview",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "role",
+            "value": "interviewee / job applicant",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "time",
+            "value": "afternoon",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "location",
+            "value": "A's company",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0032",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0033",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B majored in mechanical engineering",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "major",
+            "value": "mechanical engineering",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "action",
+            "value": "chose to major",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0036",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0040",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0047",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B is primarily interested in mechanical engineering",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "interest_area",
+            "value": "mechanical engineering",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "degree",
+            "value": "primarily",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B has worked for 3 years",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "work_experience_duration",
+            "value": "3 years",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0034",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0038",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0041",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0048",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0050",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B has a resume that A read",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "object",
+            "value": "resume",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "action",
+            "value": "read by A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0042",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0044",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "B applied for a position at A's company",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "applied / decided to apply",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "a position",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "location",
+            "value": "A's company",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0045",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0052",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f8",
+        "canonical_claim": "B is one of several applicants competing for the position",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "status",
+            "value": "one of several applicants",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "the position",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0051",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f9",
+        "canonical_claim": "B asked about additional courses and cost reimbursement during the interview",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "asked a question",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "topic",
+            "value": "additional courses / cost reimbursement",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "context",
+            "value": "during the interview",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0043",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0046",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0049",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f10",
+        "canonical_claim": "B gave an answer that A considered very good / positive before the career development question",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "evaluation",
+            "value": "very good / positive",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "timing",
+            "value": "before the career development question",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0035",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 8250,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5439,
+      "text_tokens": 8250
+    },
+    "prompt_tokens": 2939,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 2939
+    },
+    "total_tokens": 11189
+  }
+}

@@ -1,0 +1,628 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Mom , look ! My first piggy bank and it still has money in it !"
+        },
+        {
+          "turn_id": 3,
+          "text": "Remember when I used to beg you to break it so I could go buy ice cream ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "Thanks for not giving in to my childhood tantrums , mom ."
+        },
+        {
+          "turn_id": 7,
+          "text": "I think I'm going to keep it as a monument to what I've learned about money ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B did not give in to A's childhood tantrums about breaking the piggy bank",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B was begged by A to break the piggy bank",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B raised A during childhood",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B is A's mother",
+          "turn_ids": [
+            1,
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B was present and interactable during A's childhood",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "B demonstrated restraint by refusing to give in to the speaker's childhood demands",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "The hidden partner was begged by A to break the piggy bank",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B had authority to break the piggy bank but chose not to",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "The hidden partner has memory of the speaker's childhood",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B refused to break the piggy bank despite A's childhood tantrums",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B is currently physically present with A and being shown the piggy bank",
+          "turn_ids": [
+            1
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B is expected to remember the time A begged to break the piggy bank",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "The hidden partner is the speaker's mother",
+          "turn_ids": [
+            1,
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B had the authority or ability to break A's piggy bank",
+          "turn_ids": [
+            3
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B did not break A's piggy bank",
+          "turn_ids": [
+            1,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B was begged by A to break the piggy bank",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B did not break A's piggy bank despite A begging her to",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "The hidden partner was present during the speaker's childhood",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "B played a role in A's financial education",
+          "turn_ids": [
+            5,
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B is A's mother",
+          "turn_ids": [
+            1,
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B did not give in to A's childhood tantrums",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B is A's mother.",
+          "turn_ids": [
+            1,
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B was present during the speaker's childhood",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "A used to beg B to break the piggy bank so A could buy ice cream",
+          "turn_ids": [
+            3
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B did not give in to A's childhood tantrums, specifically did not break A's piggy bank when A begged to buy ice cream",
+          "turn_ids": [
+            1,
+            3,
+            5
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B did not give in to A's childhood tantrums",
+          "turn_ids": [
+            5
+          ],
+          "level": "E1"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B is A's mother",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "relation",
+            "value": "mother",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B did not give in to A's childhood tantrums and refused to break the piggy bank when A begged in order to buy ice cream, despite having the authority to do so",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "response",
+            "value": "did not give in / refused to break",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "trigger",
+            "value": "A's begging / childhood tantrums",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "object",
+            "value": "the piggy bank",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "purpose",
+            "value": "to buy ice cream",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s5",
+            "name": "authority",
+            "value": "B had authority/ability to break it",
+            "core": false,
+            "required": false,
+            "weight": 1
+          },
+          {
+            "id": "s6",
+            "name": "time",
+            "value": "childhood",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s6"
+            ]
+          },
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s6"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s3",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s6"
+            ]
+          },
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s3",
+              "s5"
+            ]
+          },
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s6"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s2",
+              "s3",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3",
+              "s4",
+              "s6"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s6"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B raised A and was present and interactable during A's childhood",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "role",
+            "value": "raised / was present during A's childhood",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "time",
+            "value": "childhood",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B has memory of A's childhood and is expected to remember the piggy-bank begging episode",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "state",
+            "value": "has memory / is expected to remember",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "object",
+            "value": "A's childhood / the piggy-bank begging event",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B is currently physically present with A and being shown the piggy bank",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "state",
+            "value": "physically present with A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "activity",
+            "value": "being shown the piggy bank",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B played a role in A's financial education",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "role",
+            "value": "contributed to A's financial education",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 7428,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5525,
+      "text_tokens": 7428
+    },
+    "prompt_tokens": 1688,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1688
+    },
+    "total_tokens": 9116
+  }
+}

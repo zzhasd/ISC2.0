@@ -1,0 +1,294 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 隐式/显式事实审核专家。原始预测中的 target、hidden partner、对话另一方均指 B；visible speaker 指 A。你的唯一任务是判断 A 单侧是否足以支持关于 B 的候选事实；不看 B 隐藏发言，不能猜测 B 的真实回答。严格输出 JSON。\n定义：E1=A 直接陈述/明确称呼/明确断言 B 的属性。E2=A 的预设、语用行为、指代或多轮证据足够强地支持的保守推断；不要求形式逻辑绝对必然，但不能仅是常见猜测。E3=相关但证据不够，例如开放问题、条件句未兑现、身份未定、时态/数量/角色过强。E4=毫无相关线索。CONTRADICTED=A 证据否定该断言。NOT_B=不是关于 B 的属性事实。UNCERTAIN=必须人工复核的边界案例。\n先将候选中相互独立的 B 谓词拆成 atoms；不要把同一事件的时间、对象、程度和否定等必要限定条件随意拆成独立不完整事实。如果联合事实只有部分支持，可输出一条有据的核心事实以及一条未被支持的额外断言，不能把复合断言整体算完全正确。每个 atom 的 text 必须是完整可独立判断的 B 命题。\n从全部 A 可见轮次寻找证据，不必拘泥于候选自引证据。turn_ids 必须属于给定 A 轮次，若 E1/E2 则至少一个；若 E4/NOT_B 则可空。引用存在不代表支持充分。禁止把请求当完成、可能当已然、问题当肯定、A 的身份当 B 的身份、A 的行为当 B 的行为。尤其仔细判断角色、对象、时间、数量、否定、条件、职业与事件状态。拒绝空洞属性（例如 B 正在某个对话中）。\n只输出 {\"items\":[{\"id\":\"候选ID\",\"atoms\":[{\"text\":\"完整原子命题\",\"label\":\"E1|E2|E3|E4|CONTRADICTED|NOT_B|UNCERTAIN\",\"turn_ids\":[1],\"mechanism\":\"explicit|presupposition|cross_turn|coreference|speech_act|event_state|weak|none\",\"reason\":\"<=40字简短依据\"}]}]}。即便不是 B 属性，也必须有一个 NOT_B atom。不得漏掉、重复任何候选 ID。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Hi , my name is Ted , what's yours ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "I said , I'm Ted , who are you ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "Do you come here often , Laura ?"
+        },
+        {
+          "turn_id": 7,
+          "text": "Let's go outside and talk . So Laura , do you come here often ?"
+        },
+        {
+          "turn_id": 9,
+          "text": "I asked if you come here often ."
+        },
+        {
+          "turn_id": 11,
+          "text": "No , this is my first time here ."
+        },
+        {
+          "turn_id": 13,
+          "text": "Yeah , that's why I'm here . My friends dragged me here , because they think I spend too much time studying ."
+        },
+        {
+          "turn_id": 15,
+          "text": "I guess so . But the music is too loud . I don't mind getting out and meeting people , but next time I'll do it in a park ."
+        }
+      ],
+      "candidates": [
+        {
+          "id": "c0000",
+          "claim": "B was at a location with loud music where A suggested going outside to talk."
+        },
+        {
+          "id": "c0001",
+          "claim": "B is at a venue (likely a club or bar) for the first time."
+        },
+        {
+          "id": "c0002",
+          "claim": "The hidden partner spends a lot of time studying"
+        },
+        {
+          "id": "c0003",
+          "claim": "B is at a venue with loud music"
+        },
+        {
+          "id": "c0004",
+          "claim": "B's name is Laura."
+        },
+        {
+          "id": "c0005",
+          "claim": "The hidden partner would prefer to meet people in a park next time"
+        },
+        {
+          "id": "c0006",
+          "claim": "B is at the same venue as A at the time of the conversation"
+        },
+        {
+          "id": "c0007",
+          "claim": "The hidden partner's friends dragged them to this venue"
+        },
+        {
+          "id": "c0008",
+          "claim": "B complained or stated that the music was too loud, which A agreed with."
+        },
+        {
+          "id": "c0009",
+          "claim": "The hidden partner is at a venue with loud music"
+        },
+        {
+          "id": "c0010",
+          "claim": "The hidden partner is open to meeting people"
+        },
+        {
+          "id": "c0011",
+          "claim": "The hidden partner's name is Laura"
+        }
+      ]
+    },
+    "max_tokens": 12000,
+    "temperature": 0,
+    "thinking_budget": 4096
+  },
+  "output": {
+    "items": [
+      {
+        "id": "c0000",
+        "atoms": [
+          {
+            "text": "B was at a location with loud music where A suggested going outside to talk.",
+            "label": "E2",
+            "turn_ids": [
+              7,
+              15
+            ],
+            "mechanism": "presupposition",
+            "reason": "A建议出去说话且说音乐太吵，暗示B同在场"
+          }
+        ]
+      },
+      {
+        "id": "c0001",
+        "atoms": [
+          {
+            "text": "B is at a venue for the first time.",
+            "label": "E3",
+            "turn_ids": [
+              11
+            ],
+            "mechanism": "none",
+            "reason": "A说自己第一次来，无法推断B是否第一次"
+          }
+        ]
+      },
+      {
+        "id": "c0002",
+        "atoms": [
+          {
+            "text": "B spends a lot of time studying.",
+            "label": "E3",
+            "turn_ids": [
+              13
+            ],
+            "mechanism": "none",
+            "reason": "A说自己花太多时间学习，非关于B"
+          }
+        ]
+      },
+      {
+        "id": "c0003",
+        "atoms": [
+          {
+            "text": "B is at a venue with loud music.",
+            "label": "E2",
+            "turn_ids": [
+              15,
+              7
+            ],
+            "mechanism": "presupposition",
+            "reason": "A说音乐太吵且建议出去谈，B同在场"
+          }
+        ]
+      },
+      {
+        "id": "c0004",
+        "atoms": [
+          {
+            "text": "B's name is Laura.",
+            "label": "E1",
+            "turn_ids": [
+              5,
+              7
+            ],
+            "mechanism": "explicit",
+            "reason": "A直接称呼B为Laura"
+          }
+        ]
+      },
+      {
+        "id": "c0005",
+        "atoms": [
+          {
+            "text": "B would prefer to meet people in a park next time.",
+            "label": "E3",
+            "turn_ids": [
+              15
+            ],
+            "mechanism": "none",
+            "reason": "A说自己下次去公园，非B的偏好"
+          }
+        ]
+      },
+      {
+        "id": "c0006",
+        "atoms": [
+          {
+            "text": "B is at the same venue as A at the time of the conversation.",
+            "label": "E2",
+            "turn_ids": [
+              7
+            ],
+            "mechanism": "presupposition",
+            "reason": "A建议一起出去说话，预设B同在场"
+          }
+        ]
+      },
+      {
+        "id": "c0007",
+        "atoms": [
+          {
+            "text": "B's friends dragged B to this venue.",
+            "label": "E3",
+            "turn_ids": [
+              13
+            ],
+            "mechanism": "none",
+            "reason": "A说自己的朋友拉自己来，非关于B"
+          }
+        ]
+      },
+      {
+        "id": "c0008",
+        "atoms": [
+          {
+            "text": "B complained or stated that the music was too loud.",
+            "label": "E3",
+            "turn_ids": [
+              15
+            ],
+            "mechanism": "none",
+            "reason": "A自己说音乐太吵，无法确认B先提出"
+          },
+          {
+            "text": "A agreed with B's complaint about loud music.",
+            "label": "E3",
+            "turn_ids": [
+              15
+            ],
+            "mechanism": "none",
+            "reason": "无法确认B曾抱怨，故无法确认A同意"
+          }
+        ]
+      },
+      {
+        "id": "c0009",
+        "atoms": [
+          {
+            "text": "B is at a venue with loud music.",
+            "label": "E2",
+            "turn_ids": [
+              15,
+              7
+            ],
+            "mechanism": "presupposition",
+            "reason": "A说音乐太吵且建议出去谈，B同在场"
+          }
+        ]
+      },
+      {
+        "id": "c0010",
+        "atoms": [
+          {
+            "text": "B is open to meeting people.",
+            "label": "E3",
+            "turn_ids": [
+              15
+            ],
+            "mechanism": "none",
+            "reason": "A说自己不介意认识人，非关于B"
+          }
+        ]
+      },
+      {
+        "id": "c0011",
+        "atoms": [
+          {
+            "text": "B's name is Laura.",
+            "label": "E1",
+            "turn_ids": [
+              5,
+              7
+            ],
+            "mechanism": "explicit",
+            "reason": "A直接称呼B为Laura"
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 2204,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1502,
+      "text_tokens": 2204
+    },
+    "prompt_tokens": 1090,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 1090
+    },
+    "total_tokens": 3294
+  }
+}

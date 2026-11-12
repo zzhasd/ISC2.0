@@ -1,0 +1,1231 @@
+{
+  "binding": {
+    "model": "qwen3.8-max-0902",
+    "system": "你是 A-only 规范事实库和信息覆盖审核员。输入都是另一轮审核已经确认 E1/E2 的完整原子命题；它们可能有重复、宽泛形式及互补细节。只看 A 发言及这些命题，不能看算法名称、旧金标准来源，也不能引用 B 发言。输出 JSON。\n目标：将关于同一 B 实体、同一事件、同一关系的命题合并为一个最有信息量且 A 侧确实支持的规范事实；把不同关系（例如姓名/职业/拥有物）分开。同一事件的时间、对象、程度、状态放进 slots，不要产生新的无证据字段。事件不同不能因同属一类而合并。语义上部分覆盖但未完整恢复的命题可以加入同一 fact，只标记它确实覆盖的字段。严格不能因为宽泛预测便给它未提到的具体 slot。\n每个 fact 要有 canonical_claim、level(E1|E2)、slots(至少一个 core/required)，members(引用所有被分配的 atom_id，且声明每条 atom 覆盖哪些 slot_ids)。core=true 表示主体-谓词-关键对象的核心判断；required=true 表示完整恢复金标准/事实需覆盖的字段。每个 slot.weight 取1或2，核心可设2，其他1。所有输入 atom 必须恰好分配一次；不得发明 atom_id；不准把原本 E2 细节提升为 E1。若同一 fact 同时含 E1/E2 证据，level 按整个最完整命题的支持机制选择。\n只输出 {\"facts\":[{\"id\":\"f1\",\"canonical_claim\":\"B ...\",\"level\":\"E1|E2\",\"slots\":[{\"id\":\"s1\",\"name\":\"role|relation|object|time|state|...\",\"value\":\"...\",\"core\":true,\"required\":true,\"weight\":2}],\"members\":[{\"atom_id\":\"...\",\"slot_ids\":[\"s1\"]}]}]}。只对输入命题中实际陈述的字段建立覆盖，禁止把另一个输入成员的细节自动分配给本成员。",
+    "payload": {
+      "visible_turns": [
+        {
+          "turn_id": 1,
+          "text": "Excuse me , sir . What would you like to eat , Chinese food or western food ?"
+        },
+        {
+          "turn_id": 3,
+          "text": "Are you going to have this set course or have dinner in the dining room ?"
+        },
+        {
+          "turn_id": 5,
+          "text": "Please put down the table in front of you . It's more comfortable that way ."
+        },
+        {
+          "turn_id": 7,
+          "text": "It's my pleasure . What would you like to drink , milk , tea , coffee , orange juice or iced water ?"
+        },
+        {
+          "turn_id": 9,
+          "text": "Yes , here you are . Enjoy your meal ."
+        },
+        {
+          "turn_id": 11,
+          "text": "OK , enjoy yourself , sir ."
+        },
+        {
+          "turn_id": 13,
+          "text": "It is beef . Do you like it ?"
+        },
+        {
+          "turn_id": 15,
+          "text": "You are welcome . Please press that button if you need any help ."
+        }
+      ],
+      "atoms": [
+        {
+          "atom_id": "a0000",
+          "claim": "B is in a room equipped with a service call button",
+          "turn_ids": [
+            5,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0001",
+          "claim": "B is in a setting with a service button",
+          "turn_ids": [
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0002",
+          "claim": "B is not in the dining room",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0003",
+          "claim": "B is addressed as 'sir' by A",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0004",
+          "claim": "B was offered a choice between Chinese food and western food",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0005",
+          "claim": "The hidden partner was served beef",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0006",
+          "claim": "B chose the set course rather than dinner in the dining room",
+          "turn_ids": [
+            3,
+            5,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0007",
+          "claim": "B thanked A again near the end of the conversation",
+          "turn_ids": [
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0008",
+          "claim": "B is male",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0009",
+          "claim": "B 正在吃的食物是牛肉",
+          "turn_ids": [
+            13
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0010",
+          "claim": "B is a customer being served food and drink by A",
+          "turn_ids": [
+            1,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0011",
+          "claim": "B has a table in front of them",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0012",
+          "claim": "B is addressed as 'sir' by A",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0013",
+          "claim": "B is eating a meal served by A",
+          "turn_ids": [
+            5,
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0014",
+          "claim": "B was offered a drink selection including milk, tea, coffee, orange juice, or iced water",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0015",
+          "claim": "B has a fold-down table in front of them that had not yet been put down",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0016",
+          "claim": "B thanked A",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0017",
+          "claim": "B 向 A 表达了感谢",
+          "turn_ids": [
+            7,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0018",
+          "claim": "A directed B to press a button if B needs help",
+          "turn_ids": [
+            15
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0019",
+          "claim": "B is eating beef",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0020",
+          "claim": "B is having a meal",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0021",
+          "claim": "B is seated with a fold-down tray table in front of them",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0022",
+          "claim": "B was offered a choice of drinks including milk, tea, coffee, orange juice, and iced water",
+          "turn_ids": [
+            7
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0023",
+          "claim": "B is male",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0024",
+          "claim": "B requested a drink from the offered options",
+          "turn_ids": [
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0025",
+          "claim": "B has a meal",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0026",
+          "claim": "B was offered a choice between Chinese food and western food",
+          "turn_ids": [
+            1
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0027",
+          "claim": "B received something from A",
+          "turn_ids": [
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0028",
+          "claim": "The hidden partner is male",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0029",
+          "claim": "B expressed gratitude to A",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0030",
+          "claim": "B thanked A at some point",
+          "turn_ids": [
+            7
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0031",
+          "claim": "B is having dinner",
+          "turn_ids": [
+            3,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0032",
+          "claim": "A directs B to press a button if B needs help",
+          "turn_ids": [
+            15
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0033",
+          "claim": "B's meal includes beef as a dish",
+          "turn_ids": [
+            13
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0034",
+          "claim": "A helps B set up a table in front of them",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0035",
+          "claim": "B is male",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0036",
+          "claim": "B thanked A at least twice during the interaction",
+          "turn_ids": [
+            7,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0037",
+          "claim": "B is having a meal",
+          "turn_ids": [
+            9,
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0038",
+          "claim": "B chose to have the set course rather than dinner in the dining room",
+          "turn_ids": [
+            3,
+            5,
+            7,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0039",
+          "claim": "B is male",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0040",
+          "claim": "B is addressed as 'sir'",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0041",
+          "claim": "B is seated with a table in front of them",
+          "turn_ids": [
+            5
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0042",
+          "claim": "B is male",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0043",
+          "claim": "B is receiving room service",
+          "turn_ids": [
+            3,
+            5,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0044",
+          "claim": "B's meal includes beef",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0045",
+          "claim": "B is addressed as 'sir' by the server",
+          "turn_ids": [
+            1,
+            11
+          ],
+          "level": "E1"
+        },
+        {
+          "atom_id": "a0046",
+          "claim": "B chose the set course rather than dining in the dining room",
+          "turn_ids": [
+            3,
+            5,
+            9
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0047",
+          "claim": "B expressed gratitude to A a second time",
+          "turn_ids": [
+            7,
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0048",
+          "claim": "B is in a setting with a service call button for requesting help",
+          "turn_ids": [
+            15
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0049",
+          "claim": "B asked what the food is",
+          "turn_ids": [
+            13
+          ],
+          "level": "E2"
+        },
+        {
+          "atom_id": "a0050",
+          "claim": "B is not in the dining room",
+          "turn_ids": [
+            3,
+            5
+          ],
+          "level": "E2"
+        }
+      ]
+    },
+    "max_tokens": 30000,
+    "temperature": 0,
+    "thinking_budget": 8192
+  },
+  "output": {
+    "facts": [
+      {
+        "id": "f1",
+        "canonical_claim": "B is male and is addressed as 'sir' by A",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "gender",
+            "value": "male",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "form_of_address",
+            "value": "sir",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "addressed_by",
+            "value": "A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0003",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0008",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0012",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0023",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0028",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0035",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0039",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0040",
+            "slot_ids": [
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0042",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0045",
+            "slot_ids": [
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "canonical_claim": "B was offered a choice between Chinese food and western food",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "offered a food choice",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "options",
+            "value": "Chinese food or western food",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0004",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0026",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f3",
+        "canonical_claim": "B chose the set course rather than dinner in the dining room, and is not in the dining room",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "choice",
+            "value": "set course",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "rejected_option",
+            "value": "dinner in the dining room",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "location_state",
+            "value": "not in the dining room",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0002",
+            "slot_ids": [
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0006",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0038",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0046",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0050",
+            "slot_ids": [
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f4",
+        "canonical_claim": "B is seated with a fold-down tray table in front that had not yet been put down, and A directed B to put it down",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "object",
+            "value": "fold-down table / tray table",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "position",
+            "value": "in front of B",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "state",
+            "value": "not yet put down",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "A_action",
+            "value": "directed B to put down the table",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0011",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0015",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0021",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0034",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0041",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f5",
+        "canonical_claim": "B was offered a drink selection including milk, tea, coffee, orange juice, and iced water",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "offered a drink choice",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "options",
+            "value": "milk, tea, coffee, orange juice, iced water",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0014",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0022",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f6",
+        "canonical_claim": "B requested a drink from the offered options and received it from A",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "requested a drink",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "source_of_choice",
+            "value": "from the offered options",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s3",
+            "name": "received_from",
+            "value": "A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0024",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0027",
+            "slot_ids": [
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f7",
+        "canonical_claim": "B is having a meal (dinner) served by A",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "activity",
+            "value": "having a meal / dinner",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "served_by",
+            "value": "A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0013",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0020",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0025",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0031",
+            "slot_ids": [
+              "s1"
+            ]
+          },
+          {
+            "atom_id": "a0037",
+            "slot_ids": [
+              "s1"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f8",
+        "canonical_claim": "B's meal is beef; B is eating beef",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "food",
+            "value": "beef",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "relation",
+            "value": "B is eating / B's meal includes",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0005",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0009",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0019",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0033",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0044",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f9",
+        "canonical_claim": "B asked what the food is",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "asked",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "question_content",
+            "value": "what the food is",
+            "core": true,
+            "required": true,
+            "weight": 2
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0049",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f10",
+        "canonical_claim": "B thanked A at least twice during the interaction, including near the end",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "action",
+            "value": "thanked / expressed gratitude",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "target",
+            "value": "A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "frequency",
+            "value": "at least twice",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "timing",
+            "value": "including near the end of the conversation",
+            "core": false,
+            "required": false,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0007",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s4"
+            ]
+          },
+          {
+            "atom_id": "a0016",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0017",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0029",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0030",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0036",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0047",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f11",
+        "canonical_claim": "B is a customer receiving room service (food and drink) from A",
+        "level": "E2",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "role",
+            "value": "customer",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "service_type",
+            "value": "food and drink service / room service",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "served_by",
+            "value": "A",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0010",
+            "slot_ids": [
+              "s1",
+              "s2",
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0043",
+            "slot_ids": [
+              "s2"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "f12",
+        "canonical_claim": "A directed B to press the service call button if B needs help; B is in a setting equipped with such a button",
+        "level": "E1",
+        "slots": [
+          {
+            "id": "s1",
+            "name": "instruction",
+            "value": "press the button if you need help",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s2",
+            "name": "instructor",
+            "value": "A",
+            "core": true,
+            "required": true,
+            "weight": 2
+          },
+          {
+            "id": "s3",
+            "name": "setting",
+            "value": "room/setting equipped with a service call button",
+            "core": false,
+            "required": true,
+            "weight": 1
+          },
+          {
+            "id": "s4",
+            "name": "purpose",
+            "value": "requesting help",
+            "core": false,
+            "required": true,
+            "weight": 1
+          }
+        ],
+        "members": [
+          {
+            "atom_id": "a0000",
+            "slot_ids": [
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0001",
+            "slot_ids": [
+              "s3"
+            ]
+          },
+          {
+            "atom_id": "a0018",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0032",
+            "slot_ids": [
+              "s1",
+              "s2"
+            ]
+          },
+          {
+            "atom_id": "a0048",
+            "slot_ids": [
+              "s3",
+              "s4"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "usage": {
+    "completion_tokens": 9109,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5656,
+      "text_tokens": 9109
+    },
+    "prompt_tokens": 2738,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 2738
+    },
+    "total_tokens": 11847
+  }
+}

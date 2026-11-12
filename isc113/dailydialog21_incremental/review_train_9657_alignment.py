@@ -1,0 +1,27 @@
+import evaluator_io as e
+e.publish_alignment('train_9657',[
+'B is addressed by the surname Vale and courtesy title Mrs.',
+'B is female.',
+'A invites or instructs B to sit down at the initial meeting.',
+'B is present at the meeting with A, whose time and setting are progressively specified.',
+'B is not yet seated at the start of the meeting.',
+'B is married or identified using the married-associated title Mrs.',
+'B is a candidate or participant in consideration for the consulting position.',
+'B is offered a company-car benefit conditional on consulting employment.',
+'B has prospective duties of visiting customers throughout the territory five days a week.',
+'B must attend the three-week course associated with obtaining the consulting job.',
+'B is conditionally offered the consulting job subject to course performance.',
+'B is offered a prospective starting salary of $150 per week plus commission.',
+],{
+1:[1,2,3,4,5,6],
+2:[3,5,1,2,6,4],
+3:[7,1,6,2,4,3],
+4:[4,7,1,3,2],
+5:[1,8,7,4,2],
+6:[4,3,1,2,7,9],
+7:[2,7,9,10,1,6,11,4,5,8],
+8:[9,10,7,1,11,12,2],
+9:[7,1,6,11,12,4,3,10,9,2],
+10:[9,12,1,10,2,4,3,11,7,8],
+11:[2,9,10,4,11,12,5,1,7,8],
+})

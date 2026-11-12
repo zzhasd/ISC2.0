@@ -1,0 +1,105 @@
+{
+  "item_id": "dailydialog/train_1662/A_to_B",
+  "stages": {
+    "E1_ledger": {
+      "count": 2,
+      "valid_spans": 2
+    },
+    "E2_mechanisms": {
+      "count": 2,
+      "valid_spans": 2
+    },
+    "targeted_completion": {
+      "count": 1,
+      "valid_spans": 1
+    }
+  },
+  "invalid": [],
+  "candidate_count": 5,
+  "decisions": [
+    {
+      "id": "c1",
+      "claim": "B looks pale",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "explicit",
+      "verdict": "keep",
+      "level": "E1",
+      "same_as": "",
+      "reason": "A directly states 'You look pale' — this is an explicit observation about B's appearance, preserved as A's claim about B.",
+      "counterexample": "",
+      "action": "keep"
+    },
+    {
+      "id": "c2",
+      "claim": "B has poor health",
+      "sources": [
+        "E1"
+      ],
+      "mechanism": "explicit",
+      "verdict": "reject",
+      "level": "E3",
+      "same_as": "",
+      "reason": "'must have poor health' is A's inference/deduction from B's pale appearance, not a confirmed attribute of B. A's opinions are not automatically B's attributes.",
+      "counterexample": "B could be pale for other reasons (cold, lighting, mood) without having poor health.",
+      "action": "reject_unsupported"
+    },
+    {
+      "id": "c3",
+      "claim": "B appeared pale to A",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "duplicate",
+      "level": "E2",
+      "same_as": "c1",
+      "reason": "'B appeared pale to A' is the perceptual framing of the same evidence 'You look pale' already captured by c1. Mutual equivalence in entity, action, and polarity.",
+      "counterexample": "",
+      "action": "drop_true_duplicate"
+    },
+    {
+      "id": "c4",
+      "claim": "A inferred B has poor health based on B's pale appearance",
+      "sources": [
+        "E2"
+      ],
+      "mechanism": "explicit",
+      "verdict": "reject",
+      "level": "E3",
+      "same_as": "",
+      "reason": "This describes A's reasoning process, not an attribute of B. It is about what A inferred, which does not establish a fact about B.",
+      "counterexample": "A could be wrong in the inference; the claim is about A's cognition, not B's state.",
+      "action": "reject_unsupported"
+    },
+    {
+      "id": "c5",
+      "claim": "B has not yet seen a doctor",
+      "sources": [
+        "rescue"
+      ],
+      "mechanism": "presupposition",
+      "verdict": "keep",
+      "level": "E2",
+      "same_as": "",
+      "reason": "'Why not go to see the doctor?' presupposes B has not yet seen a doctor (otherwise the suggestion would be odd). This is a genuine E2 presupposition from a definite suggestion.",
+      "counterexample": "B could have seen a doctor previously but A is suggesting another visit, though the phrasing 'go to see' more naturally implies no prior visit.",
+      "action": "keep"
+    }
+  ],
+  "review_second_opinion": {
+    "reviewed": 2,
+    "restored": 0
+  },
+  "final_claims": 2,
+  "generic_claims_kept": 1,
+  "api_task_ids": [
+    "52fbeb78384d69de3dbe4ab9379798857f65a67861ba9263c5bdad850af5c0d7",
+    "21552092f80324f7ad02f88ce4663c26f9bdca0d96344034e096dd4ad5f2ffb0",
+    "37737f5976ef178ddacc1f91240d2157e3cbdb40d5b775fac9cc0da7871d329b",
+    "7d7a1d40e55d6fb4877c2284f69e83c2c94fa3d18f5f7f40a7fba7564b1ea75a",
+    "0253c8e7ce2ffb04fc410c166120c2e59bf13dc04f83d3b48b1f6aee80f0a8f8"
+  ],
+  "design": "relation-preserving E1/E2 + independent dispute review"
+}
