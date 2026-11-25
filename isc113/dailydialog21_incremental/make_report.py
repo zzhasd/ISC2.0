@@ -10,7 +10,9 @@ def table(p):
 def fmt(v):return 'NA' if v in (None,'') else f'{float(v):.3f}'
 
 def main():
+    from prepare_evaluation import scoring_input_fingerprint
     assert not(HERE/'results/evaluation_revision_required.json').exists(), 'Run full scoring and verification after review revisions'
+    assert read(HERE/'results/scoring_status.json')['input_fingerprint']==scoring_input_fingerprint(), 'Report inputs changed after scoring; rerun analysis and verification'
     verify=read(HERE/'results/verification.json');assert verify['complete'] and verify['offline_replayed_predictions']==682
     effects=read(HERE/'results/effect_summary.json');summary=table(HERE/'results/prefix_summary.csv')
     metrics=table(HERE/'results/prefix_metrics.csv');rows={(r['algorithm'],int(r['prefix_k'])):r for r in summary}
@@ -47,10 +49,10 @@ def main():
         lines.append(f"| {label} | {fmt(e['estimate'])} | [{fmt(e['ci95_low'])}, {fmt(e['ci95_high'])}] |")
     def effect(key):return next(e for e in effects if e['statistic']==key)
     h2=effect('gap_growth_k11_minus_k1');marginal=effect('mean_first_new_difference_k2_to_k11')
-    h2_text='区间整体大于零，支持本样本内相对差距扩大' if h2['ci95_low']>0 else '区间整体小于零，表现为相对差距缩小' if h2['ci95_high']<0 else '区间包含零，不能据此认定相对差距扩大'
+    h2_text='区间整体大于零，支持本样本内 ELARA−Direct 有符号差值从 k=1 到 k=11 增大' if h2['ci95_low']>0 else '区间整体小于零，ELARA−Direct 有符号差值从 k=1 到 k=11 减小' if h2['ci95_high']<0 else '区间包含零，不能据此认定 ELARA−Direct 有符号差值随前缀增长而增大'
     lines.extend(['', f"H2：{h2_text}。首次新增差的区间为 [{fmt(marginal['ci95_low'])}, {fmt(marginal['ci95_high'])}]；首次新增按统一事实 ID 计算，消失后重现不重复计数。",
                   '', '## 机制与敏感性诊断', '',
-                  '| 算法 | k=11 E1 唯一核心均值 | k=11 E2 唯一核心均值 | k=2–11 首次新增 E1 均值 | k=2–11 首次新增 E2 均值 | k=11 独立 Sweep 核心召回 |',
+                  '| 算法 | k=11 E1 唯一核心均值 | k=11 E2 唯一核心均值 | k=2–11 首次新增 E1 均值 | k=2–11 首次新增 E2 均值 | k=11 Sweep 支持子集核心召回 |',
                   '|---|---:|---:|---:|---:|---:|'])
     for alg in names:
         final=[r for r in metrics if r['algorithm']==alg and int(r['prefix_k'])==11]

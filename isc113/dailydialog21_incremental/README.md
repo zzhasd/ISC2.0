@@ -51,6 +51,9 @@ python prepare_evaluation.py pool
 python prepare_evaluation.py alignment
 # Designated Sol subagent authors alignment/judgments/{dialogue_id}.json.
 python analyze.py
+python crosscheck_original_agd.py
+python verify.py
+python make_report.py
 python -m unittest test_experiment.py -v
 ```
 

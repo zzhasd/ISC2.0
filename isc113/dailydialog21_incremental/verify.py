@@ -185,9 +185,17 @@ def main(inference_only=False):
             for r in rr:
                 total+=int(r['first_new_count']);assert total==int(r['ever_found_count'])
                 assert int(r['unique_core_count'])<=int(r['pool_count'])
-    assert len(list((HERE/'figures').glob('figure*.png')))==4
+    required_figures=('figure1_raw_growth','figure2_valid_unique_growth','figure3_new_discovery','figure4_paired_difference')
+    for name in required_figures:
+        for ext in ('png','pdf'):
+            assert (HERE/'figures'/f'{name}.{ext}').is_file(), f'Missing required figure: {name}.{ext}'
     assert read(HERE/'results/scoring_status.json')['input_fingerprint']==scoring_input_fingerprint(),'Statistics are stale after a judgment revision'
+    control=read(HERE/'validation/original_agd_crosscheck.json')
+    assert control['complete'] and control['metric_rows_compared']==682
+    assert control['input_fingerprint']==scoring_input_fingerprint(),'Original-score crosscheck is stale'
+    assert control['model_api_calls']==0
     summary={'complete':True,'offline_replayed_predictions':replayed,'counts':dict(counts),
+             'original_agd_numeric_crosscheck_rows':control['metric_rows_compared'],
              'api_attempts':len(completed),'valid_logical_requests':len(valid),
              'duplicate_valid_completions':len([r for r in completed if r.get('valid')])-len(valid),
              'api_failure_count':sum(not r.get('valid',False) for r in completed),

@@ -16,6 +16,11 @@ its current A-only utterances, and its existing neutral judgments. Never read
 `results`. The independent Sweep is already frozen; do not modify it. Do not
 inspect later A prefixes before completing the current prefix's Support and Pool.
 
+Candidate IDs are prefix-local: identical wording in different prefixes can have
+different IDs. Pool indices enumerate only valid atoms (including splits), so
+they do not correspond to Support candidate indices. Always locate content by
+the current prefix ID, candidate/atom ID and text, not by an index from memory.
+
 Proceed in k=1 to 11 order. Check complete judgments and partial batch receipts
 before submitting anything: retain valid existing work. Use
 `show_support(prefix_id, batch)` to display one original batch, at most 12
@@ -50,6 +55,9 @@ atomic Support revision use `prepare_evaluation.py refresh-pool --prefix-id PID
 --reason "specific reason"`. For a semantic Pool/coverage revision with unchanged
 Support, add `--pool-only`. Both modes archive downstream artifacts and invalidate
 stale alignment. Never overwrite old evidence without the revision trail.
+If only a nonvalid atom's text or label changes and the effective E1/E2 Pool input
+is identical, preserve the existing Pool; a Pool refresh is unnecessary. Final
+statistics still bind to the revised Support through the input fingerprint.
 
 Once all 11 Pools exist:
 
@@ -68,3 +76,15 @@ Report one completed dialogue to the coordinator, with local fact and identity
 counts. If a helper blocks progress, send the exact issue for repair. If the
 model usage limit recurs, report it honestly and stop; never substitute a model
 or manufacture a completion record.
+
+## Local execution recovery
+
+On 2026-11-24 the default Windows exec and Node sandbox could not initialize
+(`helper_unknown_error: setup refresh had errors`). The coordinator verified that
+normal `exec_command` approval with `sandbox_permissions=require_escalated`,
+`login=false`, and explicit workspace working directory can execute the authorized
+experiment operations. If the same setup error occurs, use that normal approval
+path with a precise justification, scoped to this dialogue's experiment files.
+Do not alter sandbox settings or access unrelated files; report an approval
+rejection rather than attempting to bypass it. Prefer normal sandboxed execution
+when it is available again.
