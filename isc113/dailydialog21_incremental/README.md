@@ -13,7 +13,8 @@ ELARA's original Flash candidate audit is part of the predictor and is preserved
 - All 31 dialogues with exactly 21 turns from `data/dailydialog.jsonl` (27 train,
   2 validation, 2 test); 341 A-only prefixes; 682 independent predictions.
 - Original Direct limit 10; ELARA three generation passes plus candidate audit
-  batches of 8, with no final output cap. No earlier prefix predictions are input.
+  batches of 8. Each pass requests up to 16 claims (parser limit 18), with no
+  separate final truncation. No earlier prefix predictions are input.
 - Independent Sweep precedes exposure to any predictions. Support packets merge
   exact-normalized candidates from both algorithms and Sweep, using neutral IDs
   and at most 12 candidates per batch. Source mapping is separate and private.
@@ -40,8 +41,9 @@ API requests and raw responses are recorded in `inference/api/attempts.jsonl`.
 Credentials are never written by these scripts. First valid cached responses are
 reused. No automatic retry of unresolved requests with uncertain billing.
 
-`evaluator_io.py` transports independent Sweep decisions only; it has no model API
-or semantic heuristics. After the entire Sweep and inference finish:
+`evaluator_io.py` transports model-authored semantic decisions and validates their
+structure; it has no model API or semantic heuristics. After the entire Sweep and
+inference finish:
 
 ```powershell
 python prepare_evaluation.py support

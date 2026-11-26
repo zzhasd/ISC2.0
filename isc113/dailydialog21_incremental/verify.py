@@ -75,7 +75,9 @@ def verify_review_progress():
             mapped=[m['unified_fact_id'] for m in obj['mapping'] if m['prefix_id']==p['prefix_id']]
             assert len(mapped)==len(set(mapped)), 'Two local facts collapsed within one prefix; Pool needs review'
         alignment_count+=1
-    summary={'overall_evaluation_complete':False,'support_files_validated':support_count,
+    complete=(support_count==ready_count==pool_count==341 and alignment_count==31
+              and not pending and not level_findings)
+    summary={'overall_evaluation_complete':complete,'support_files_validated':support_count,
              'support_prefixes_with_verified_batch_receipts':ready_count,
              'pool_files_validated':pool_count,'pending_batch_metadata':pending,
              'missing_support_prefixes':341-support_count,'missing_pools':341-pool_count,
