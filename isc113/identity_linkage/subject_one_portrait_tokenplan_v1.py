@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -36,6 +36,8 @@ import sys
 import threading
 import time
 import zipfile
+
+import requests
 
 if not __package__:
     # Support `python subject_one_portrait.py ...` without moving project files.
@@ -109,11 +111,27 @@ def _install_fake_ua() -> None:
 # Token Plan OpenAI-compatible chat-completions endpoint; keep original Client/payloads.
 ENDPOINT = 'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions'
 WORKERS = 3  # 固定并发上限；不提供命令行覆盖
+PORTRAIT_REQUEST_TIMEOUTS = {
+    'filtered_repeat/direct': (25, 600),
+    'filtered_repeat/summary': (25, 600),
+    'filtered_repeat/summary_stage2': (25, 600),
+}
+PORTRAIT_MAX_TOKENS = 30_000
+LEGACY_PORTRAIT_MAX_TOKENS = 20_000
+DEFAULT_PORTRAIT_THINKING_BUDGET = 2_048
 
 CODE = original.CODE  # Same seven original source files, unchanged.
 SUMMARY_VERSION = 'summary_v2_two_stage'
 SUMMARY_REPAIR_POLICY = 'conditional second generation; existing portraits only; all omitted IDs exactly once'
+# These runners use the same prompts, evidence and validation with earlier budgets.
+COMPATIBLE_RUNNER_SHA256 = (
+    '91314b0ee873ceb3473d5c7f56cfc86a0c6f54371878e2474da7ad2f69b9a7c9',
+    'a8a936f17d45cad97f570640265fb183afffa5e7955168783b63196b2753009c',
+    'd6af76b4ecad3fc0dcf4141f76cc30df572b143fb9c1501f5840106785a11b92',
+)
 PRINT_LOCK = threading.Lock()
+LEDGER_WRITE_LOCK = threading.Lock()
+STOP_REQUESTED = threading.Event()
 
 
 def say(message: str) -> None:
@@ -168,17 +186,28 @@ def select_subject(subject: str):
     return inputs, selection, partners
 
 
+def runner_snapshot_hash(snapshot: Path):
+    current_hash = sha256(Path(__file__))
+    if not snapshot.exists():
+        return current_hash
+    snapshot_hash = sha256(snapshot)
+    if snapshot_hash not in (current_hash, *COMPATIBLE_RUNNER_SHA256):
+        raise ValueError('Summary runner snapshot changed')
+    return snapshot_hash
+
+
 def prepare(subject: str, folder: Path):
     inputs, selection, partners = select_subject(subject)
     folder.mkdir(parents=True, exist_ok=True)
     source_hashes = original.hashes()
+    runner_snapshot = folder / 'source_snapshot' / Path(__file__).name
     freeze(folder / 'inputs.json', inputs)
     freeze(folder / 'selection.json', selection)
     freeze(folder / 'design.json', dict(
         subject=subject,
         pipeline='Original ELARA v1 -> one-pass A-self misattribution filter -> exact dedup -> compact Summary v2 (conditional semantic merge)',
         summary_version=SUMMARY_VERSION, summary_repair_policy=SUMMARY_REPAIR_POLICY,
-        summary_runner_sha256=sha256(Path(__file__)),
+        summary_runner_sha256=runner_snapshot_hash(runner_snapshot),
         extraction_method=algorithm.METHOD,
         summary_input_mode=portraits.SUMMARY_INPUT_MODE,
         summary_input_fields=list(portraits.SUMMARY_INPUT_FIELDS),
@@ -201,11 +230,7 @@ def prepare(subject: str, folder: Path):
         else:
             destination.write_bytes((HERE / name).read_bytes())
     # Also freeze the new runner, which owns the two-stage Summary logic.
-    runner_snapshot = folder / 'source_snapshot' / Path(__file__).name
-    if runner_snapshot.exists():
-        if runner_snapshot.read_bytes() != Path(__file__).read_bytes():
-            raise ValueError('Summary runner snapshot changed')
-    else:
+    if not runner_snapshot.exists():
         runner_snapshot.write_bytes(Path(__file__).read_bytes())
     total = sum(len(d['visible_turns']) for d in inputs['dialogues'])
     print(f'[{subject}] 找到 {len(inputs["dialogues"])} 段对话，'
@@ -213,6 +238,50 @@ def prepare(subject: str, folder: Path):
     print('对侧 A 匿名ID：' + ', '.join(partners), flush=True)
     print(f'语料 SHA-256：{selection["corpus_sha256"]}', flush=True)
     return inputs, selection
+
+
+def portrait_thinking_budget(dialogue_count: int) -> int:
+    if dialogue_count > 60:
+        return 6_144
+    if dialogue_count > 30:
+        return 4_096
+    return DEFAULT_PORTRAIT_THINKING_BUDGET
+
+
+def portrait_payload(request: dict, inputs: dict) -> dict:
+    return dict(request, max_tokens=PORTRAIT_MAX_TOKENS,
+                thinking_budget=portrait_thinking_budget(len(inputs['dialogues'])))
+
+
+def portrait_request_versions(payload: dict):
+    legacy = dict(payload, max_tokens=PORTRAIT_MAX_TOKENS,
+                  thinking_budget=DEFAULT_PORTRAIT_THINKING_BUDGET)
+    return payload, legacy, dict(legacy, max_tokens=LEGACY_PORTRAIT_MAX_TOKENS)
+
+
+def load_portrait_request(path: Path, payload: dict):
+    saved = load(path)
+    if saved not in portrait_request_versions(payload):
+        raise ValueError('Portrait request differs: ' + str(path))
+    return saved
+
+
+class _TokenPlanSession(requests.Session):
+    timeout_override = None
+
+    def post(self, url, data=None, json=None, **kwargs):
+        if STOP_REQUESTED.is_set():
+            raise KeyboardInterrupt
+        if self.timeout_override is not None:
+            kwargs['timeout'] = self.timeout_override
+        return super().post(url, data=data, json=json, **kwargs)
+
+
+class _TokenPlanClient(Client):
+    def append(self, row):
+        # Let an in-progress ledger write finish before exiting on Ctrl+C.
+        with LEDGER_WRITE_LOCK:
+            super().append(row)
 
 
 class DeferredClient:
@@ -227,7 +296,7 @@ class DeferredClient:
         self.folder = folder
         self.endpoint = endpoint
         self.key = key
-        self.clients = {0: Client(key, folder, endpoint)}
+        self.clients = {0: _TokenPlanClient(key, folder, endpoint)}
         self.retry_root = folder / 'retry_epochs'
         if self.retry_root.exists():
             for sub in self.retry_root.iterdir():
@@ -235,7 +304,7 @@ class DeferredClient:
                     number = int(sub.name.split('_')[-1])
                     if number < 1 or number in self.clients:
                         raise ValueError('Invalid/duplicate retry epoch: ' + str(sub))
-                    self.clients[number] = Client(key, sub, endpoint)
+                    self.clients[number] = _TokenPlanClient(key, sub, endpoint)
         # On a genuinely new run, preserve the legacy root attempts.jsonl layout.
         # On resume, even the first pass must use an unused ledger.
         if len(self.clients) == 1 and not self.clients[0].path.exists():
@@ -255,11 +324,11 @@ class DeferredClient:
                 number += 1
                 continue
             break
-        self.clients[number] = Client(self.key, target, self.endpoint)
+        self.clients[number] = _TokenPlanClient(self.key, target, self.endpoint)
         self.epoch = number
         return number
 
-    def call(self, name, payload, validate):
+    def _recover(self, name, payload, validate):
         task = digest(dict(name=name, endpoint=self.endpoint, payload=payload))
         # Recover even partially completed ELARA pipelines across ALL old epochs.
         # Preserve the original newest-first cache preference.
@@ -273,10 +342,34 @@ class DeferredClient:
                         return Client.parse(r['body'], validate), task
                     except (ValueError, KeyError, AttributeError, TypeError, IndexError):
                         pass
+
+    def call_portrait(self, method, payload, validate):
+        name = f'filtered_repeat/{method}'
+        path = self.folder / f'{method}_request.json'
+        saved = load_portrait_request(path, payload) if path.exists() else None
+        if saved != payload:
+            if saved is not None:
+                # Reuse validated legacy responses before upgrading an unfinished request.
+                cached = self._recover(name, saved, validate)
+                if cached is not None:
+                    return cached
+            save(path, payload)
+        return self.call(name, payload, validate)
+
+    def call(self, name, payload, validate):
+        cached = self._recover(name, payload, validate)
+        if cached is not None:
+            return cached
         # Only the fresh current epoch can perform network I/O. Old failures
         # (including exhausted attempts, provider stop flags, unknown billing,
         # and unresolved starts) cannot consume this epoch's retry budget.
-        return self.clients[self.epoch].call(name, payload, validate)
+        client = self.clients[self.epoch]
+        # Client keeps a separate session per worker. Select the override for
+        # every logical call so extraction and filtering use Client's default.
+        if not hasattr(client.local, 'session'):
+            client.local.session = _TokenPlanSession()
+        client.local.session.timeout_override = PORTRAIT_REQUEST_TIMEOUTS.get(name)
+        return client.call(name, payload, validate)
 
     def ledgers(self):
         return [(index, client.path) for index, client in sorted(self.clients.items())
@@ -296,16 +389,19 @@ def run_jobs(jobs, func, workers, stage):
     items = list(jobs.items())
     completed = 0
     progress = tqdm(total=len(items), desc=stage, unit='任务', dynamic_ncols=True) if tqdm is not None else None
+    pool = ThreadPoolExecutor(max_workers=workers)
+    interrupted = False
     try:
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            batch_size = WORKERS if workers == WORKERS else workers
-            for start in range(0, len(items), batch_size):
-                batch = items[start:start + batch_size]
-                if workers == WORKERS:  # 只在最多 3 个并行任务的批次前等待
-                    time.sleep(random.uniform(0.0, 3.0))
-                futures = {pool.submit(func, key, arg): key for key, arg in batch}
-                for future in as_completed(futures):
-                    key = futures[future]
+        for start in range(0, len(items), workers):
+            batch = items[start:start + workers]
+            if workers == WORKERS:  # 只在最多 3 个并行任务的批次前等待
+                time.sleep(random.uniform(0.0, 3.0))
+            futures = {pool.submit(func, key, arg): key for key, arg in batch}
+            while futures:
+                # A bounded wait gives Windows Python a chance to handle Ctrl+C.
+                done, _ = wait(futures, timeout=0.2, return_when=FIRST_COMPLETED)
+                for future in done:
+                    key = futures.pop(future)
                     completed += 1
                     try:
                         future.result()
@@ -317,8 +413,13 @@ def run_jobs(jobs, func, workers, stage):
                     else:
                         print(f'\r[{stage}] {completed}/{len(items)} 完成',
                               end='\n' if completed == len(items) else '', flush=True)
+    except KeyboardInterrupt:
+        interrupted = True
+        STOP_REQUESTED.set()
+        raise
     finally:
-        if progress is not None:
+        pool.shutdown(wait=not interrupted, cancel_futures=interrupted)
+        if progress is not None and not interrupted:
             progress.close()
     say(f'[{stage}] 完成：成功 {len(jobs)-len(failures)}，失败 {len(failures)}')
     return failures
@@ -498,14 +599,14 @@ def summary_final_report(coverage, patch, final):
 
 def generate_summary(folder, inputs, clients, unique):
     """One normal Summary task, up to two successful model stages; checkpoint each."""
-    req = portraits.compact_summary_request(unique)  # unchanged first-stage request/prompt
-    freeze(folder/'summary_request.json', req)
+    req = portrait_payload(portraits.compact_summary_request(unique), inputs)
     first_path = folder/'summary_stage1_raw.json'
     if first_path.exists():
+        load_portrait_request(folder/'summary_request.json', req)
         first_raw = load(first_path)
     else:
-        first, tid = clients.call('filtered_repeat/summary', req,
-                                  lambda x: validate_stage1(x, inputs, unique))
+        first, tid = clients.call_portrait('summary', req,
+                                          lambda x: validate_stage1(x, inputs, unique))
         first_raw = dict(prediction=first, task_id=tid)
         freeze(first_path, first_raw)
     first = first_raw['prediction']
@@ -516,15 +617,15 @@ def generate_summary(folder, inputs, clients, unique):
     second_raw = None
     patch = None
     if coverage['stage2_required']:
-        req2 = summary_repair_request(first, unique, coverage)
-        freeze(folder/'summary_stage2_request.json', req2)
+        req2 = portrait_payload(summary_repair_request(first, unique, coverage), inputs)
         second_path = folder/'summary_stage2_raw.json'
         say('[Summary 第二阶段·正常生成] 仅融合遗漏属性，不计作外层补跑。')
         if second_path.exists():
+            load_portrait_request(folder/'summary_stage2_request.json', req2)
             second_raw = load(second_path)
         else:
-            patch, tid2 = clients.call('filtered_repeat/summary_stage2', req2,
-                                       lambda x: validate_repair(x, first, coverage))
+            patch, tid2 = clients.call_portrait('summary_stage2', req2,
+                                               lambda x: validate_repair(x, first, coverage))
             second_raw = dict(prediction=patch, task_id=tid2)
             freeze(second_path, second_raw)
         patch = validate_repair(second_raw['prediction'], first, coverage)
@@ -549,8 +650,8 @@ def verify_summary_stages(folder, inputs, unique):
     patch = None
     second_raw = None
     if coverage['stage2_required']:
-        if load(folder/'summary_stage2_request.json') != summary_repair_request(first, unique, coverage):
-            raise ValueError('Second-stage request differs')
+        req2 = portrait_payload(summary_repair_request(first, unique, coverage), inputs)
+        load_portrait_request(folder/'summary_stage2_request.json', req2)
         second_raw = load(folder/'summary_stage2_raw.json')
         patch = validate_repair(second_raw['prediction'], first, coverage)
     elif any((folder/f).exists() for f in ('summary_stage2_request.json', 'summary_stage2_raw.json')):
@@ -597,7 +698,8 @@ def audit_requests(inputs, folder, clients, unique):
         name = row['logical_name']
         if name in ('filtered_repeat/direct', 'filtered_repeat/summary', 'filtered_repeat/summary_stage2'):
             method = name.rsplit('/', 1)[-1]
-            if req != load(folder / f'{method}_request.json'):
+            saved = load(folder / f'{method}_request.json')
+            if req not in portrait_request_versions(saved):
                 raise ValueError('Portrait request differs from original')
             requests_by_kind[method] += 1
         elif '/filter/' in name:
@@ -640,7 +742,8 @@ def audit_requests(inputs, folder, clients, unique):
 
 
 def verify(subject, folder, inputs, selection, clients):
-    if load(folder / 'design.json')['summary_runner_sha256'] != sha256(Path(__file__)):
+    runner_snapshot = folder / 'source_snapshot' / Path(__file__).name
+    if load(folder / 'design.json')['summary_runner_sha256'] != runner_snapshot_hash(runner_snapshot):
         raise ValueError('Summary runner changed since prepare')
     if load(folder / 'design.json')['original_code_sha256'] != original.hashes():
         raise ValueError('Core code changed since prepare (refuse incompatible resume)')
@@ -675,10 +778,8 @@ def verify(subject, folder, inputs, selection, clients):
             if not ((item['actual_owner'] == 'A' and item['reason_code'] in subject_filter.A_DROP_REASONS)
                     or (item['actual_owner'] == 'MIXED' and item['reason_code'] == 'MIXED_A_B')):
                 raise ValueError('DROP decision violates original policy')
-    if load(folder/'direct_request.json') != original.direct_request(inputs):
-        raise ValueError('Direct request differs')
-    if load(folder/'summary_request.json') != portraits.compact_summary_request(unique):
-        raise ValueError('Summary request differs')
+    load_portrait_request(folder/'direct_request.json', portrait_payload(original.direct_request(inputs), inputs))
+    load_portrait_request(folder/'summary_request.json', portrait_payload(portraits.compact_summary_request(unique), inputs))
     summary_report = verify_summary_stages(folder, inputs, unique)
     for method in ('summary', 'direct'):
         raw = load(folder / f'{method}_raw.json')['prediction']
@@ -745,6 +846,10 @@ def export(subject, folder, inputs):
 
 def execute(subject, folder, workers, retries, endpoint, allow_unknown_billing=True, dry_run=False):
     inputs, selection = prepare(subject, folder)
+    dialogue_count = len(inputs['dialogues'])
+    thinking_budget = portrait_thinking_budget(dialogue_count)
+    say(f'[画像配置] {dialogue_count} 段对话，Direct 和 Summary 两阶段的 '
+        f'thinking_budget={thinking_budget}')
     if dry_run:
         print('DRY RUN：仅完成数据选择与冻结，未读取自述画像、未调用 API。', flush=True)
         return 0
@@ -762,10 +867,9 @@ def execute(subject, folder, workers, retries, endpoint, allow_unknown_billing=T
 
     def direct(_key, _arg):
         if (folder/'direct_portraits.json').exists(): return
-        req = original.direct_request(inputs)
-        freeze(folder/'direct_request.json', req)
-        obj, tid = clients.call('filtered_repeat/direct', req,
-                                lambda x: portraits.validate_portraits(x, 'direct', inputs, []))
+        req = portrait_payload(original.direct_request(inputs), inputs)
+        obj, tid = clients.call_portrait('direct', req,
+                                        lambda x: portraits.validate_portraits(x, 'direct', inputs, []))
         freeze(folder/'direct_raw.json', dict(prediction=obj, task_id=tid))
         freeze(folder/'direct_portraits.json', obj)
 
@@ -941,5 +1045,17 @@ def main(argv=None):
         return 1
 
 
+def cli():
+    try:
+        return main()
+    except KeyboardInterrupt:
+        STOP_REQUESTED.set()
+        print('\n[中断] 已收到 Ctrl+C。已写入的结果可用原命令续跑。',
+              file=sys.stderr, flush=True)
+        # The executor's interpreter-exit hook would join workers blocked in HTTP.
+        with LEDGER_WRITE_LOCK:
+            os._exit(130)
+
+
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(cli())
