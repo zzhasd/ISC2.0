@@ -31,6 +31,79 @@ class SummaryClient:
 class SummaryRepairTests(unittest.TestCase):
     inputs = dict(dialogues=[])
 
+    def test_repeated_first_stage_cutoffs_switch_to_json_object_and_replay(self):
+        unique = [attribute('U1', '有猫')]
+        first = dict(portraits=[portrait('R1', '有猫', 'U1')], limitations='')
+        payload = runner.portrait_payload(runner.portraits.compact_summary_request(unique), self.inputs)
+        task = runner.digest(dict(name='filtered_repeat/summary', endpoint=runner.ENDPOINT, payload=payload))
+        cutoff = dict(event='complete', task_id=task, http_status=200, valid=False,
+                      error='JSONDecodeError: Unterminated string starting at: line 1 column 47')
+        with TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            runner.save(folder / 'summary_request.json', payload)
+            ledger = folder / 'attempts.jsonl'
+            ledger.write_text((json.dumps(cutoff) + '\n') * runner.SUMMARY_STAGE1_JSON_AFTER_CUTOFFS,
+                              encoding='utf-8')
+            client = SummaryClient(folder, dict(summary_stage1_json=first))
+            runner.generate_summary(folder, self.inputs, client, unique)
+            self.assertEqual(client.calls, ['summary_stage1_json'])
+            self.assertEqual(runner.load(folder / 'summary_request.json'), payload)
+            self.assertEqual(runner.load(folder / 'summary_stage1_json_request.json'),
+                             dict(payload, response_format={'type': 'json_object'}))
+            self.assertTrue(runner.verify_summary_stages(folder, self.inputs, unique)['exact_partition'])
+
+    def test_repeated_missing_patch_fields_switch_to_schema_without_regenerating_stage_one(self):
+        unique = [attribute(f'U{i:03}', f'属性 {i}') for i in range(1, 6)]
+        first = dict(portraits=[portrait('R1', '画像', 'U001', 'U002', 'U003', 'U004')], limitations='')
+        bad_patch = dict(portraits=[dict(portrait_id='R1', statement='补入第五项')])
+        patch = dict(portraits=[dict(portrait_id='R1', statement='补入第五项', added_unique_ids=['U005'])])
+        with TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            initial = SummaryClient(folder, dict(summary=first, summary_stage2=bad_patch))
+            with self.assertRaisesRegex(ValueError, 'Bad second-stage patch fields'):
+                runner.generate_summary(folder, self.inputs, initial, unique)
+            payload = runner.load(folder / 'summary_stage2_request.json')
+            task = runner.digest(dict(name='filtered_repeat/summary_stage2', endpoint=runner.ENDPOINT, payload=payload))
+            failure = dict(event='complete', task_id=task, http_status=200, valid=False,
+                           error='ValueError: Bad second-stage patch fields')
+            (folder / 'attempts.jsonl').write_text(
+                (json.dumps(failure) + '\n') * runner.SUMMARY_STAGE2_SCHEMA_AFTER_BAD_PATCHES, encoding='utf-8')
+            resumed = SummaryClient(folder, dict(summary_stage2_schema=patch))
+            runner.generate_summary(folder, self.inputs, resumed, unique)
+            self.assertEqual(resumed.calls, ['summary_stage2_schema'])
+            self.assertEqual(runner.load(folder / 'summary_stage2_schema_request.json'),
+                             dict(payload, response_format=runner.SUMMARY_REPAIR_RESPONSE_FORMAT))
+            report = runner.verify_summary_stages(folder, self.inputs, unique)
+            self.assertEqual(report['repaired_count'], 1)
+            self.assertTrue(report['exact_partition'])
+
+    def test_cutoffs_in_combined_duplicate_stage_separate_owners_from_rewrites(self):
+        unique = [attribute('U1', '有猫'), attribute('U2', '喜欢露营')]
+        first = dict(portraits=[portrait('R1', '有猫，喜欢露营', 'U1', 'U2'),
+                                portrait('R2', '有猫', 'U1')], limitations='')
+        with TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            initial = SummaryClient(folder, dict(summary=first, summary_stage3={}))
+            with self.assertRaisesRegex(ValueError, 'Bad third-stage Summary object'):
+                runner.generate_summary(folder, self.inputs, initial, unique)
+            payload = runner.load(folder / 'summary_stage3_request.json')
+            task = runner.digest(dict(name='filtered_repeat/summary_stage3', endpoint=runner.ENDPOINT, payload=payload))
+            failure = dict(event='complete', task_id=task, http_status=200, valid=False,
+                           error='JSONDecodeError: Unterminated string starting at: line 1 column 47')
+            (folder / 'attempts.jsonl').write_text(
+                (json.dumps(failure) + '\n') * runner.SUMMARY_STAGE3_OWNERS_AFTER_CUTOFFS, encoding='utf-8')
+            resumed = SummaryClient(folder, dict(summary_stage3_owners=dict(owners={'U1': 'R2'}),
+                summary_stage3_rewrite=dict(portraits=[dict(portrait_id='R1', statement='喜欢露营')])))
+            runner.generate_summary(folder, self.inputs, resumed, unique)
+            self.assertEqual(resumed.calls, ['summary_stage3_owners', 'summary_stage3_rewrite'])
+            request = runner.load(folder / 'summary_stage3_owners_request.json')
+            self.assertEqual(request['messages'][1], payload['messages'][1])
+            owners_schema = request['response_format']['json_schema']['schema']['properties']['owners']
+            self.assertEqual(owners_schema['properties']['U1']['enum'], ['R1', 'R2'])
+            report = runner.verify_summary_stages(folder, self.inputs, unique)
+            self.assertEqual(report['stage3_rewrite_portrait_ids'], ['R1'])
+            self.assertTrue(report['exact_partition'])
+
     def test_duplicate_rewrites_keep_valid_updates_and_request_only_missing_targets(self):
         unique = [attribute('U1', '有猫'), attribute('U2', '喜欢露营'), attribute('U3', '周末做饭')]
         first = dict(portraits=[
