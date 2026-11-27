@@ -31,6 +31,42 @@ class SummaryClient:
 class SummaryRepairTests(unittest.TestCase):
     inputs = dict(dialogues=[])
 
+    def test_duplicate_rewrites_keep_valid_updates_and_request_only_missing_targets(self):
+        unique = [attribute('U1', '有猫'), attribute('U2', '喜欢露营'), attribute('U3', '周末做饭')]
+        first = dict(portraits=[
+            portrait('R1', '有猫，喜欢露营', 'U1', 'U2'),
+            portrait('R2', '有猫', 'U1'),
+            portrait('R3', '有猫，周末做饭', 'U1', 'U3'),
+            portrait('R4', '有猫', 'U1'),
+        ], limitations='')
+        third = dict(owners={'U1': 'R2'}, portraits=[
+            dict(portrait_id='R1', statement='喜欢露营'),
+            dict(portrait_id='R2', statement='多余的赢家更新'),
+            dict(portrait_id='R3', statement='第一份冲突声明'),
+            dict(portrait_id='R3', statement='第二份冲突声明'),
+            dict(portrait_id='R4', statement='即将移除的画像'),
+        ])
+        replacement = dict(portraits=[dict(portrait_id='R3', statement='周末做饭')])
+        with TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            client = SummaryClient(folder, dict(summary=first, summary_stage3=third,
+                                               summary_stage3_rewrite=replacement))
+            runner.generate_summary(folder, self.inputs, client, unique)
+            self.assertEqual(client.calls, ['summary', 'summary_stage3', 'summary_stage3_rewrite'])
+            request = runner.load(folder / 'summary_stage3_rewrite_request.json')
+            packet = json.loads(request['messages'][1]['content'])
+            self.assertEqual(packet['portraits'], [
+                dict(portrait_id='R3', statement='有猫，周末做饭',
+                     retained_unique_ids=['U3'], removed_unique_ids=['U1'])])
+            report = runner.verify_summary_stages(folder, self.inputs, unique)
+            self.assertEqual(report['stage3_rewrite_portrait_ids'], ['R3'])
+            self.assertEqual(report['duplicate_removed_portrait_ids'], ['R4'])
+            result = runner.load(folder / 'summary_raw.json')['prediction']
+            self.assertEqual(result['portraits'], [
+                portrait('R1', '喜欢露营', 'U2'), first['portraits'][1],
+                portrait('R3', '周末做饭', 'U3'),
+            ])
+
     def test_omissions_are_applied_before_duplicate_ownership_and_resume(self):
         unique = [
             attribute('U1', '有一只猫'), attribute('U2', '经常露营'),
