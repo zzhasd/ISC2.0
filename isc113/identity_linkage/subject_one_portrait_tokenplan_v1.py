@@ -130,6 +130,8 @@ DEFAULT_PORTRAIT_THINKING_BUDGET = 2_048
 CODE = original.CODE  # Same seven original source files, unchanged.
 SUMMARY_VERSION = 'summary_v3_sequential_repair'
 SUMMARY_REPAIR_POLICY = 'fill omitted IDs in existing portraits, then resolve duplicate ownership'
+SUMMARY_STAGE1_MAX_MISSING_PERCENT = 20
+REJECTED_SUMMARY_STAGE1_DIR = 'rejected_summary_stage1'
 LEGACY_SUMMARY_VERSION = 'summary_v2_two_stage'
 LEGACY_SUMMARY_REPAIR_POLICY = 'conditional second generation; existing portraits only; all omitted IDs exactly once'
 PIPELINE_PREFIX = 'Original ELARA v1 -> one-pass A-self misattribution filter -> exact dedup -> compact '
@@ -141,6 +143,7 @@ COMPATIBLE_RUNNER_SHA256 = (
     'b1ed1a4da939fdc2f20687a1a996e04e02583ca3a5b25296a158e1151e201610',
     'a0b2ae9df35b2780a59d3f2855aef3e3806fc662a7b83113b76d29ccccc52e6b',
     'dfef191c4cf3054ed6ac792279bf7a016d2bb125ad5522d95f3a1028b28b9645',
+    '8293b4a823ca2ec752c83e94cc9f9b3f3230a54b0c3c9a4bd2d07a651c907433',
 )
 PRINT_LOCK = threading.Lock()
 LEDGER_WRITE_LOCK = threading.Lock()
@@ -839,6 +842,11 @@ def stage1_coverage(obj, inputs, unique):
                 stage2_required=bool(missing))
 
 
+def summary_missing_exceeds_limit(coverage):
+    return (100 * coverage['missing_count'] >
+            SUMMARY_STAGE1_MAX_MISSING_PERCENT * coverage['total_attributes'])
+
+
 def validate_stage1(obj, inputs, unique):
     if not isinstance(obj, dict) or not isinstance(obj.get('portraits'), list):
         raise ValueError('Bad first-stage Summary object')
@@ -869,7 +877,11 @@ def validate_stage1(obj, inputs, unique):
             normalized.append(dict(p, unique_ids=refs))
     result = dict(obj, portraits=normalized)
     result.setdefault('limitations', '')
-    stage1_coverage(result, inputs, unique)
+    coverage = stage1_coverage(result, inputs, unique)
+    if summary_missing_exceeds_limit(coverage):
+        missing, total = coverage['missing_count'], coverage['total_attributes']
+        raise ValueError(f'First-stage Summary missing {missing}/{total} ({100 * missing / total:.1f}%), '
+                         f'above the {SUMMARY_STAGE1_MAX_MISSING_PERCENT}% limit')
     return result
 
 
@@ -1172,6 +1184,21 @@ def verify_summary_stages(folder, inputs, unique):
     return report
 
 
+def rejected_summary_stage2_request(folder, inputs, unique):
+    """Verify obsolete repair requests against their original rejected checkpoint."""
+    archived = folder / REJECTED_SUMMARY_STAGE1_DIR
+    request_path = archived / 'summary_stage2_request.json'
+    if not request_path.exists():
+        return None
+    first = load(archived / 'summary_stage1_raw.json')['prediction']
+    coverage = stage1_coverage(first, inputs, unique)
+    if (coverage != load(archived / 'summary_stage1_coverage.json')
+            or not summary_missing_exceeds_limit(coverage)):
+        raise ValueError('Archived Summary checkpoint does not match its rejection')
+    expected = portrait_payload(summary_repair_request(first, unique, coverage), inputs)
+    return load_portrait_request(request_path, expected)
+
+
 def audit_requests(inputs, folder, clients, unique):
     """Compare all sent request prompts and visible inputs against original code."""
     ledger = []
@@ -1193,6 +1220,7 @@ def audit_requests(inputs, folder, clients, unique):
     # delivery of fully validated artifacts. All sent payloads are still audited.
     dialogues = {d['dialogue']: d for d in inputs['dialogues']}
     turns = direct_turns(inputs)
+    rejected_stage2 = rejected_summary_stage2_request(folder, inputs, unique)
     requests_by_kind = Counter()
     for row in starts:
         req = row['request']
@@ -1202,8 +1230,11 @@ def audit_requests(inputs, folder, clients, unique):
         name = row['logical_name']
         if name in PORTRAIT_REQUEST_TIMEOUTS:
             method = name.rsplit('/', 1)[-1]
-            saved = load(folder / f'{method}_request.json')
-            if req not in portrait_request_versions(saved):
+            path = folder / f'{method}_request.json'
+            active_versions = portrait_request_versions(load(path)) if path.exists() else ()
+            archived_versions = (portrait_request_versions(rejected_stage2)
+                                 if method == 'summary_stage2' and rejected_stage2 is not None else ())
+            if req not in (*active_versions, *archived_versions):
                 raise ValueError('Portrait request differs from original')
             requests_by_kind[method] += 1
         elif name.startswith(DIRECT_REVIEW_PREFIX):

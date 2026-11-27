@@ -140,15 +140,27 @@ class SummaryRepairTests(unittest.TestCase):
                 self.assertEqual(final['portraits'], [portrait('R1', '有猫并喜欢露营', 'U1', 'U2')])
 
     def test_first_stage_normalizes_numeric_ids_and_optional_limitations(self):
-        unique = [attribute('U049', '有猫'), attribute('U050', '喜欢露营')]
-        obj = dict(portraits=[portrait('R1', '有猫', 'U49', 'M049', 'M49', 'U101'),
+        unique = [attribute(f'U{i:03}', f'属性 {i}') for i in range(49, 54)]
+        obj = dict(portraits=[portrait('R1', '有猫', 'U49', 'M049', 'M49', 'U101', 'U051', 'U052', 'U053'),
                               portrait('R2', '无有效引用', 'U102')])
         accepted = runner.validate_stage1(obj, self.inputs, unique)
         self.assertEqual(accepted, dict(
-            portraits=[portrait('R1', '有猫', 'U049', 'U049', 'U049')], limitations=''))
+            portraits=[portrait('R1', '有猫', 'U049', 'U049', 'U049', 'U051', 'U052', 'U053')], limitations=''))
         coverage = runner.stage1_coverage(accepted, self.inputs, unique)
         self.assertEqual(coverage['missing_unique_ids'], ['U050'])
         self.assertEqual(coverage['extra_duplicate_occurrences'], 2)
+
+    def test_first_stage_rejects_over_twenty_percent_missing_before_repair(self):
+        unique = [attribute(f'U{i:03}', f'属性 {i}') for i in range(1, 6)]
+        rejected = dict(portraits=[portrait('R1', '画像', 'U001', 'U002', 'U003', 'U003', 'U099')])
+        with TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            client = SummaryClient(folder, dict(summary=rejected))
+            with self.assertRaisesRegex(ValueError, r'missing 2/5 \(40.0%\)'):
+                runner.generate_summary(folder, self.inputs, client, unique)
+            self.assertEqual(client.calls, ['summary'])
+            self.assertFalse((folder / 'summary_stage1_raw.json').exists())
+            self.assertFalse((folder / 'summary_stage2_request.json').exists())
 
     def test_summary_parser_repairs_known_field_syntax(self):
         content = r'''{"portraits":[{"portrait_id":"R1","statement":"B在"家中有冰淇淋"这点相似，称为\"甜点\"。","unique_ids":"U049", "M50"}],"limitations":"观察有限"]}'''
