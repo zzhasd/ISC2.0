@@ -31,6 +31,21 @@ class SummaryClient:
 class SummaryRepairTests(unittest.TestCase):
     inputs = dict(dialogues=[])
 
+    def test_omission_repair_accepts_an_unchanged_statement_with_new_citation(self):
+        unique = [attribute(f'U{i:03}', f'属性 {i}') for i in range(1, 6)]
+        first = dict(portraits=[portrait('R1', '已表达第五项', 'U001', 'U002', 'U003', 'U004')],
+                     limitations='')
+        patch = dict(portraits=[dict(portrait_id='R1', statement='已表达第五项', added_unique_ids=['U005'])])
+        with TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            client = SummaryClient(folder, dict(summary=first, summary_stage2_v2=patch))
+            runner.generate_summary(folder, self.inputs, client, unique)
+            packet = json.loads(runner.load(folder / 'summary_stage2_v2_request.json')['messages'][1]['content'])
+            self.assertEqual(packet['omitted_attributes'], [dict(unique_id='U005', claim='属性 5')])
+            final = runner.load(folder / 'summary_raw.json')['prediction']['portraits']
+            self.assertEqual(final, [portrait('R1', '已表达第五项', 'U001', 'U002', 'U003', 'U004', 'U005')])
+            self.assertTrue(runner.verify_summary_stages(folder, self.inputs, unique)['exact_partition'])
+
     def test_repeated_first_stage_cutoffs_switch_to_json_object_and_replay(self):
         unique = [attribute('U1', '有猫')]
         first = dict(portraits=[portrait('R1', '有猫', 'U1')], limitations='')
@@ -59,27 +74,28 @@ class SummaryRepairTests(unittest.TestCase):
         patch = dict(portraits=[dict(portrait_id='R1', statement='补入第五项', added_unique_ids=['U005'])])
         with TemporaryDirectory() as tmp:
             folder = Path(tmp)
-            initial = SummaryClient(folder, dict(summary=first, summary_stage2=bad_patch))
+            initial = SummaryClient(folder, dict(summary=first, summary_stage2_v2=bad_patch))
             with self.assertRaisesRegex(ValueError, 'Bad second-stage patch fields'):
                 runner.generate_summary(folder, self.inputs, initial, unique)
-            payload = runner.load(folder / 'summary_stage2_request.json')
-            task = runner.digest(dict(name='filtered_repeat/summary_stage2', endpoint=runner.ENDPOINT, payload=payload))
+            payload = runner.load(folder / 'summary_stage2_v2_request.json')
+            task = runner.digest(dict(name='filtered_repeat/summary_stage2_v2', endpoint=runner.ENDPOINT, payload=payload))
             failure = dict(event='complete', task_id=task, http_status=200, valid=False,
                            error='ValueError: Bad second-stage patch fields')
             (folder / 'attempts.jsonl').write_text(
                 (json.dumps(failure) + '\n') * runner.SUMMARY_STAGE2_SCHEMA_AFTER_BAD_PATCHES, encoding='utf-8')
-            resumed = SummaryClient(folder, dict(summary_stage2_schema=patch))
+            resumed = SummaryClient(folder, dict(summary_stage2_v2_schema=patch))
             runner.generate_summary(folder, self.inputs, resumed, unique)
-            self.assertEqual(resumed.calls, ['summary_stage2_schema'])
-            self.assertEqual(runner.load(folder / 'summary_stage2_schema_request.json'),
+            self.assertEqual(resumed.calls, ['summary_stage2_v2_schema'])
+            self.assertEqual(runner.load(folder / 'summary_stage2_v2_schema_request.json'),
                              dict(payload, response_format=runner.SUMMARY_REPAIR_RESPONSE_FORMAT))
             report = runner.verify_summary_stages(folder, self.inputs, unique)
             self.assertEqual(report['repaired_count'], 1)
             self.assertTrue(report['exact_partition'])
 
     def test_cutoffs_in_combined_duplicate_stage_separate_owners_from_rewrites(self):
-        unique = [attribute('U1', '有猫'), attribute('U2', '喜欢露营')]
-        first = dict(portraits=[portrait('R1', '有猫，喜欢露营', 'U1', 'U2'),
+        unique = [attribute('U1', '有猫'), attribute('U2', '喜欢露营'),
+                  attribute('U3', '住在东京'), attribute('U4', '周末做饭')]
+        first = dict(portraits=[portrait('R1', '有猫，喜欢露营', 'U1', 'U2', 'U3', 'U4'),
                                 portrait('R2', '有猫', 'U1')], limitations='')
         with TemporaryDirectory() as tmp:
             folder = Path(tmp)
@@ -105,10 +121,11 @@ class SummaryRepairTests(unittest.TestCase):
             self.assertTrue(report['exact_partition'])
 
     def test_duplicate_rewrites_keep_valid_updates_and_request_only_missing_targets(self):
-        unique = [attribute('U1', '有猫'), attribute('U2', '喜欢露营'), attribute('U3', '周末做饭')]
+        unique = [attribute('U1', '有猫'), attribute('U2', '喜欢露营'), attribute('U3', '周末做饭'),
+                  attribute('U4', '养了一只狗')]
         first = dict(portraits=[
             portrait('R1', '有猫，喜欢露营', 'U1', 'U2'),
-            portrait('R2', '有猫', 'U1'),
+            portrait('R2', '有猫也有狗', 'U1', 'U4'),
             portrait('R3', '有猫，周末做饭', 'U1', 'U3'),
             portrait('R4', '有猫', 'U1'),
         ], limitations='')
@@ -162,10 +179,10 @@ class SummaryRepairTests(unittest.TestCase):
         ])
         with TemporaryDirectory() as tmp:
             folder = Path(tmp)
-            initial = SummaryClient(folder, dict(summary=first, summary_stage2=second, summary_stage3=bad_third))
+            initial = SummaryClient(folder, dict(summary=first, summary_stage2_v2=second, summary_stage3=bad_third))
             with self.assertRaisesRegex(ValueError, 'owner must be an existing candidate'):
                 runner.generate_summary(folder, self.inputs, initial, unique)
-            self.assertEqual(initial.calls, ['summary', 'summary_stage2', 'summary_stage3'])
+            self.assertEqual(initial.calls, ['summary', 'summary_stage2_v2', 'summary_stage3'])
             self.assertFalse((folder / 'summary_portraits.json').exists())
 
             request = runner.load(folder / 'summary_stage3_request.json')
@@ -193,11 +210,12 @@ class SummaryRepairTests(unittest.TestCase):
             self.assertEqual(materialized[0]['source_details'], [unique[1], unique[3]])
 
     def test_duplicate_only_portrait_is_removed_and_local_repeats_use_no_model(self):
-        unique = [attribute('U1', '有猫'), attribute('U2', '喜欢露营')]
+        unique = [attribute(f'U{i}', f'属性 {i}') for i in range(1, 8)]
+        extra_ids = [item['unique_id'] for item in unique[2:]]
         for cross_portrait in (False, True):
             with self.subTest(cross_portrait=cross_portrait), TemporaryDirectory() as tmp:
                 folder = Path(tmp)
-                items = [portrait('R1', '有猫并喜欢露营', 'U1', 'U2', 'U2')]
+                items = [portrait('R1', '有猫并喜欢露营', 'U1', 'U2', 'U2', *extra_ids)]
                 if cross_portrait:
                     items.append(portrait('R2', '有猫', 'U1'))
                 first = dict(portraits=items, limitations='')
@@ -210,7 +228,7 @@ class SummaryRepairTests(unittest.TestCase):
                 self.assertEqual(report['duplicate_removed_portrait_ids'], ['R2'] if cross_portrait else [])
                 self.assertEqual(client.calls, ['summary', 'summary_stage3'] if cross_portrait else ['summary'])
                 final = runner.load(folder / 'summary_raw.json')['prediction']
-                self.assertEqual(final['portraits'], [portrait('R1', '有猫并喜欢露营', 'U1', 'U2')])
+                self.assertEqual(final['portraits'], [portrait('R1', '有猫并喜欢露营', 'U1', 'U2', *extra_ids)])
 
     def test_first_stage_normalizes_numeric_ids_and_optional_limitations(self):
         unique = [attribute(f'U{i:03}', f'属性 {i}') for i in range(49, 54)]
@@ -233,7 +251,22 @@ class SummaryRepairTests(unittest.TestCase):
                 runner.generate_summary(folder, self.inputs, client, unique)
             self.assertEqual(client.calls, ['summary'])
             self.assertFalse((folder / 'summary_stage1_raw.json').exists())
-            self.assertFalse((folder / 'summary_stage2_request.json').exists())
+            self.assertFalse((folder / 'summary_stage2_v2_request.json').exists())
+
+    def test_first_stage_rejects_only_above_thirty_percent_duplicate_ids(self):
+        unique = [attribute(f'U{i:03}', f'属性 {i}') for i in range(1, 11)]
+        ids = [item['unique_id'] for item in unique]
+        accepted = dict(portraits=[portrait('R1', '画像', *ids, *ids[:3])])
+        rejected = dict(portraits=[portrait('R1', '画像', *ids, *ids[:4])])
+        self.assertEqual(runner.validate_stage1(accepted, self.inputs, unique)['portraits'], accepted['portraits'])
+        with TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            client = SummaryClient(folder, dict(summary=rejected))
+            with self.assertRaisesRegex(ValueError, r'duplicate IDs 4/10 \(40.0%\), above the 30% limit'):
+                runner.generate_summary(folder, self.inputs, client, unique)
+            self.assertEqual(client.calls, ['summary'])
+            self.assertFalse((folder / 'summary_stage1_raw.json').exists())
+            self.assertFalse((folder / 'summary_stage3_request.json').exists())
 
     def test_summary_parser_repairs_known_field_syntax(self):
         content = r'''{"portraits":[{"portrait_id":"R1","statement":"B在"家中有冰淇淋"这点相似，称为\"甜点\"。","unique_ids":"U049", "M50"}],"limitations":"观察有限"]}'''
@@ -253,8 +286,9 @@ class SummaryRepairTests(unittest.TestCase):
             runner.parse_summary_response(body, lambda obj: obj)
 
     def test_only_previously_accepted_summary_responses_are_recovered(self):
-        unique = [attribute('U1', '有猫')]
-        prediction = dict(portraits=[portrait('R1', '有猫', 'U1', 'U1')], limitations='')
+        unique = [attribute(f'U{i}', f'属性 {i}') for i in range(1, 5)]
+        prediction = dict(portraits=[portrait('R1', '有猫', 'U1', 'U1', 'U2', 'U3', 'U4')],
+                          limitations='')
         payload = runner.portrait_payload(runner.portraits.compact_summary_request(unique), self.inputs)
         name = 'filtered_repeat/summary'
 
